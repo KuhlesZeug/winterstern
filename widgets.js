@@ -41,9 +41,9 @@ window.WIDGETS={
  // 3 Runenrad
  wheel(ctx){const w=ctx.D.w,A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';ctx.W.appendChild(lab('Geheime Botschaft'));ctx.W.appendChild(el('div','codeword',w.code));
   const s=sv('svg',{viewBox:'-150 -150 300 300',class:'wheel'});s.appendChild(sv('circle',{r:146,fill:'#c9a24e',stroke:'#7a5a26','stroke-width':3}));s.appendChild(sv('circle',{r:122,fill:'#f2e3b8',stroke:'#7a5a26'}));
-  for(let i=0;i<26;i++){const a=i/26*Math.PI*2;s.appendChild(sv('text',{x:Math.sin(a)*134,y:-Math.cos(a)*134+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':14,fill:'#2b2340'},A[i]))}
+  for(let i=0;i<26;i++){const a=i/26*Math.PI*2;if(i===3)s.appendChild(sv('circle',{cx:Math.sin(a)*134,cy:-Math.cos(a)*134,r:11,fill:'#8a2a3a'}));s.appendChild(sv('text',{x:Math.sin(a)*134,y:-Math.cos(a)*134+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':14,fill:i===3?'#fff':'#2b2340'},A[i]))}
   const g=sv('g',{});g.appendChild(sv('circle',{r:118,fill:'#1d2f6b'}));g.appendChild(sv('circle',{r:92,fill:'#14204f',stroke:'#e0b961','stroke-width':1}));
-  for(let i=0;i<26;i++){const a=i/26*Math.PI*2;g.appendChild(sv('text',{x:Math.sin(a)*106,y:-Math.cos(a)*106+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':14,fill:'#f1d690',transform:''},A[i]))}
+  for(let i=0;i<26;i++){const a=i/26*Math.PI*2;if(i===0)g.appendChild(sv('circle',{cx:0,cy:-106,r:11,fill:'none',stroke:'#ffd76a','stroke-width':2.5}));g.appendChild(sv('text',{x:Math.sin(a)*106,y:-Math.cos(a)*106+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':i===0?16:14,fill:i===0?'#ffd76a':'#f1d690'},A[i]))}
   g.appendChild(sv('path',{d:starPath(30,8),fill:'#e0b961',opacity:.8}));s.appendChild(g);s.appendChild(sv('path',{d:'M0 -150 l-7 -0 l7 14 l7 -14Z',fill:'#8a2a3a'}));
   let rot=ctx.solved?w.key:7,drag=false,a0=0,r0=0;const draw=()=>g.setAttribute('transform','rotate('+(rot*360/26)+')');draw();
   const ang=e=>{const [x,y]=svgPt(s,e);return Math.atan2(x,-y)};
@@ -77,23 +77,35 @@ window.WIDGETS={
   const op=(r,c)=>{const t=T[r][c];return OPEN[t][R[r][c]%(t==='I'?2:4)]};
   const fix={'3,0':0,'2,0':1,'2,1':1,'2,2':3,'1,2':0,'0,2':1,'0,3':3};
   if(ctx.solved)for(const k in fix){const [r,c]=k.split(',').map(Number);R[r][c]=fix[k]}
-  const g=el('div','stairs');const ends=el('div','stairs-ends','<span>🚪 Sternwarte ↗</span>');ends.style.justifyContent='flex-end';
-  const draw=(b,r,c)=>{const o=op(r,c);const P={n:[50,0],s:[50,100],e:[100,50],w:[0,50]};let d='';if(o.length===2){const a=P[o[0]],z=P[o[1]];d='M'+a+' Q50 50 '+z}
-   b.innerHTML='<svg viewBox="0 0 100 100"><path d="'+d+'" fill="none" stroke="#2a2140" stroke-width="34" stroke-linecap="butt"/><path d="'+d+'" fill="none" stroke="#c9a24e" stroke-width="26"/><path d="'+d+'" fill="none" stroke="#7a5a26" stroke-width="26" stroke-dasharray="3 9"/></svg>'};
+  const g=el('div','stairs');
+  const top=el('div','send top','<span></span><span></span><span></span><span class="mark goal">🚪 Sternwarte<br>▲ ZIEL</span>');
+  const bot=el('div','send bot','<span class="mark start">▲ START<br>Halle</span><span></span><span></span><span></span>');
+  const DD={n:[-1,0],s:[1,0],e:[0,1],w:[0,-1]},OPP={n:'s',s:'n',e:'w',w:'e'};
+  const reach=()=>{const seen=new Set();if(!op(3,0).includes('s'))return seen;seen.add('3,0');const q=[[3,0]];while(q.length){const [r,c]=q.shift();op(r,c).forEach(d=>{const nr=r+DD[d][0],nc=c+DD[d][1];if(nr<0||nr>3||nc<0||nc>3)return;if(!op(nr,nc).includes(OPP[d]))return;const k=nr+','+nc;if(!seen.has(k)){seen.add(k);q.push([nr,nc])}})}return seen};
+  const draw=(b,r,c,lit)=>{const o=op(r,c);const P={n:[50,0],s:[50,100],e:[100,50],w:[0,50]};const a=P[o[0]],z=P[o[1]];const d='M'+a+' Q50 50 '+z;
+   const col=lit?'#ffd76a':'#8a7c62',edge=lit?'#7a5a26':'#4f4636';
+   let steps='';for(let i=1;i<9;i++){steps+='<path d="'+d+'" fill="none" stroke="'+edge+'" stroke-width="26" stroke-dasharray="1.6 '+(9)+'" stroke-dashoffset="'+(-i*0)+'"/>';break}
+   b.innerHTML='<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="'+(lit?'#5d4f86':'#3b3256')+'"/><path d="M0 0h100v100h-100z" fill="none" stroke="#2a2140" stroke-width="3"/><path d="'+d+'" fill="none" stroke="#1d1630" stroke-width="36"/><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="26" '+(lit?'style="filter:drop-shadow(0 0 5px #ffd76a)"':'')+'/>'+steps+'</svg>';
+   b.classList.toggle('lit',!!lit)};
+  const redraw=()=>{const R0=reach();cells.forEach((b,i)=>draw(b,i>>2,i&3,R0.has((i>>2)+','+(i&3))))};
   let won=false;const cells=[];
-  const check=()=>{const D={n:[-1,0],s:[1,0],e:[0,1],w:[0,-1]},OPP={n:'s',s:'n',e:'w',w:'e'};if(!op(3,0).includes('s'))return false;const seen=new Set(['3,0']),q=[[3,0]];
-   while(q.length){const [r,c]=q.shift();if(r===0&&c===3&&op(0,3).includes('n'))return true;op(r,c).forEach(d=>{const nr=r+D[d][0],nc=c+D[d][1];if(nr<0||nr>3||nc<0||nc>3)return;if(!op(nr,nc).includes(OPP[d]))return;const k=nr+','+nc;if(!seen.has(k)){seen.add(k);q.push([nr,nc])}})}return false};
-  for(let r=0;r<4;r++)for(let c=0;c<4;c++){const b=el('button','t');draw(b,r,c);b.onclick=()=>{if(won)return;R[r][c]++;noise(.12,500,3,.25);tone(160,.1,'sine',.15);draw(b,r,c);if(check()){won=true;g.classList.add('ok');SFX.magic();ends.innerHTML='<span>🚪✨ Die Tür öffnet sich: <b>S</b></span>';setTimeout(()=>ctx.check('__OK__'),900)}};g.appendChild(b);cells.push(b)}
-  if(ctx.solved){won=true;g.classList.add('ok')}
-  ctx.noInput=true;ctx.W.append(ends,g,el('div','stairs-ends','<span>Halle ↑</span>'))},
+  const check=()=>{const R0=reach();return R0.has('0,3')&&op(0,3).includes('n')};
+  for(let r=0;r<4;r++)for(let c=0;c<4;c++){const b=el('button','t');if(r===3&&c===0)b.classList.add('st');if(r===0&&c===3)b.classList.add('en');b.onclick=()=>{if(won)return;ac();R[r][c]++;noise(.12,500,3,.25);tone(160,.1,'sine',.15);redraw();if(check()){won=true;g.classList.add('ok');SFX.magic();top.querySelector('.goal').innerHTML='🚪✨ offen!<br>Zeichen: <b>S</b>';setTimeout(()=>ctx.check('__OK__'),900)}};g.appendChild(b);cells.push(b)}
+  redraw();if(ctx.solved){won=true;g.classList.add('ok')}
+  ctx.noInput=true;ctx.W.append(top,g,bot,lab('Leuchtende Stufen sind schon mit der Halle verbunden'))},
  // 8 Labyrinth
- maze(ctx){const w=ctx.D.w,N=6,box=el('div','maze');const s=sv('svg',{viewBox:'-4 -4 308 308'});box.appendChild(s);const C=50;
+ maze(ctx){const w=ctx.D.w,N=6,box=el('div','maze');const s=sv('svg',{viewBox:'-4 -30 308 368'});box.appendChild(s);const C=50;
   s.appendChild(sv('rect',{x:-4,y:-4,width:308,height:308,rx:10,fill:'#2a2140'}));s.appendChild(sv('rect',{x:0,y:0,width:300,height:300,fill:'#3d335c'}));
   const trail=sv('g',{});s.appendChild(trail);
   for(let r=0;r<N;r++)for(let c=0;c<N;c++){const o=w.open[r][c],x=c*C,y=r*C;const L=w.let[r][c];if(L!=='.')s.appendChild(sv('text',{x:x+25,y:y+33,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':22,fill:'#f1d690'},L));
    const wl=(x1,y1,x2,y2)=>s.appendChild(sv('line',{x1,y1,x2,y2,stroke:'#c9a24e','stroke-width':5,'stroke-linecap':'round'}));
-   if(!o.includes('n'))wl(x,y,x+C,y);if(!o.includes('w'))wl(x,y,x,y+C);if(c===N-1&&!o.includes('e'))wl(x+C,y,x+C,y+C);if(r===N-1&&!o.includes('s'))wl(x,y+C,x+C,y+C)}
-  s.appendChild(sv('text',{x:275,y:-6+0,'text-anchor':'middle','font-size':0},''));
+   if(!o.includes('n')&&!(r===0&&c===N-1))wl(x,y,x+C,y);if(!o.includes('w'))wl(x,y,x,y+C);if(c===N-1&&!o.includes('e'))wl(x+C,y,x+C,y+C);if(r===N-1&&!o.includes('s')&&!(c===0))wl(x,y+C,x+C,y+C)}
+
+  const glow=(x,y,col)=>{const g0=sv('rect',{x:x+3,y:y+3,width:44,height:44,rx:8,fill:col,opacity:.35});g0.innerHTML='<animate attributeName="opacity" values=".2;.5;.2" dur="1.8s" repeatCount="indefinite"/>';s.insertBefore(g0,trail)};
+  glow(0,250,'#7fe0a0');glow(250,0,'#ffd76a');
+  s.appendChild(sv('text',{x:25,y:322,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#2f7a4a'},'▲ START'));
+  s.appendChild(sv('text',{x:275,y:-12,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#9a6b14'},'ZIEL ▲'));
+  s.appendChild(sv('path',{d:'M18 300 h14',stroke:'#2f7a4a','stroke-width':4}));
   const goal=sv('text',{x:275,y:34,'text-anchor':'middle','font-size':26},'🏰');s.appendChild(goal);
   const owl=sv('text',{x:25,y:284,'text-anchor':'middle','font-size':28},'🦉');s.appendChild(owl);
   let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+25);owl.setAttribute('y',r*C+34)};pos();

@@ -54,11 +54,13 @@ let windG=null;
 function startWind(){if(windG)return;const c=ac();const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.996+(Math.random()*2-1)*.03;x[i]=l}
  const s=c.createBufferSource();s.buffer=b;s.loop=true;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=420;f.Q.value=.6;const g=c.createGain();g.gain.value=.0;s.connect(f);f.connect(g);g.connect(master);s.start();windG=g;
  const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=.11;lg.gain.value=180;lfo.connect(lg);lg.connect(f.frequency);lfo.start();setWind(STORM)}
-function setWind(v){if(windG&&AC)windG.gain.setTargetAtTime(.10*v,AC.currentTime,1.2)}
-const music=$('#music');const MV=.07,MD=.02;music.volume=MV;
+function setWind(v){if(windG&&AC)windG.gain.setTargetAtTime(.035*v,AC.currentTime,1.2)}
+const music=$('#music');const MV=.2,MD=.06;let mG=null;
+function musicOn(){if(!st.sound)return;const c=ac();if(!mG){try{const src=c.createMediaElementSource(music);mG=c.createGain();mG.gain.value=(voice&&!voice.paused)?MD:MV;src.connect(mG);mG.connect(master)}catch(e){music.volume=.15}}music.play().catch(()=>{})}
+function mVol(v){if(mG&&AC)mG.gain.setTargetAtTime(v,AC.currentTime,.3)}
 const voice=new Audio('stimmen.mp3');voice.preload='auto';let vStop=null;
-function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}music.volume=MV;$('#btn-say').classList.remove('on')}
-function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d]=VOX[k];const go=()=>{try{voice.currentTime=s}catch(e){}music.volume=MD;voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
+function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on')}
+function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d]=VOX[k];const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
 function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
 
@@ -90,34 +92,35 @@ const glow=id=>'<defs><radialGradient id="'+id+'"><stop offset="0" stop-color="#
 $('#start-sky').innerHTML='<svg viewBox="0 0 600 420" preserveAspectRatio="xMidYMax meet">'+glow('sg0')+bgStars(70,600,260,3)+'<g transform="translate(300 150)" opacity=".35"><path d="'+starPath(16,8)+'" fill="none" stroke="#c9d3ff" stroke-width="1.2"/></g><g transform="translate(0 198)">'+castle(false)+'</g></svg>';
 
 /* ---------- Navigation ---------- */
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));const s=$(id);s.classList.add('on');s.scrollTop=0;$('#snow').style.display=(id==='#s-case'||id==='#s-book')?'none':'block'}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));const s=$(id);s.classList.add('on');s.scrollTop=0;$('#snow').style.display=(id==='#s-case'||id==='#s-book'||id==='#s-intro')?'none':'block'}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2800)}
 function sparkleAt(node,n){const r=node.getBoundingClientRect();for(let i=0;i<n;i++){const s=el('div','sparkle');s.style.left=(r.left+r.width/2)+'px';s.style.top=(r.top+r.height/2)+'px';const a=Math.random()*6.28,d=50+Math.random()*120;s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');s.style.animationDelay=(Math.random()*.3)+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),1400)}}
 
 /* ---------- Start und Intro ---------- */
-$('#btn-start').onclick=()=>{ac();if(st.act)beginIntro();else access().then(ok=>ok&&beginIntro())};
+$('#btn-start').onclick=()=>{ac();musicOn();if(st.act)beginIntro();else access().then(ok=>ok&&beginIntro())};
 const INTRO=['Rabenfels, in der längsten Nacht des Jahres.','Seit tausend Wintern leuchtet der Winterstern über unserer Akademie.','Doch heute Nacht ist er erloschen.','Ein Schneesturm legt sich um die Burg, und ein Fenster nach dem anderen wird dunkel.','Nur eine alte Formel kann ihn wieder entzünden.','Ich habe ihre Buchstaben in 24 Rätseln versteckt.','Und ich brauche deine Hilfe, junger Lehrling.'];
 let introRun=0;
-async function beginIntro(){const run=++introRun;SFX.magic();show('#s-intro');storm(.15);startWind();
- $('#intro-stage').innerHTML='<svg viewBox="0 0 600 640" preserveAspectRatio="xMidYMax slice" style="height:100%">'+glow('sg1')+bgStars(110,600,420,11)+'<g id="istar" transform="translate(300 330)"><circle r="70" fill="url(#sg1)"/><path d="'+starPath(26,8)+'" fill="#fff6d2"/></g><g transform="translate(0 418)">'+castle(true)+'</g></svg>';
- const said=say('intro');const D=(said&&VOX.intro)?VOX.intro[1]:26;const tot=INTRO.join(' ').length;let acc=0;const marks=INTRO.map(l=>{const m=acc/tot*D;acc+=l.length+1;return m});
- const it=$('#intro-text');const T0=performance.now();let li=-1;
+const IMARKS=[0,4.1,8.6,11.3,16.8,20.0,24.0];
+async function beginIntro(){const run=++introRun;SFX.magic();show('#s-intro');storm(.1);startWind();
+ const v=$('#ivid');try{v.currentTime=0}catch(e){}v.muted=true;v.play().catch(()=>{});
+ const said=say('intro');const D=(said&&VOX.intro)?VOX.intro[1]:27.5;const tot=INTRO.join(' ').length;let acc=0;const marks=IMARKS||INTRO.map(l=>{const m=acc/tot*D;acc+=l.length+1;return m});
+ const it=$('#intro-text');const T0=performance.now();let li=-1;const END=Math.max(D,v.duration||0)+.6;
  while(run===introRun){const t=(performance.now()-T0)/1000;let k=-1;marks.forEach((m,i)=>{if(t>=m)k=i});
   if(k!==li){li=k;it.style.opacity=0;await sleep(350);if(run!==introRun)return;it.textContent=INTRO[k]||'';it.style.opacity=1;
-   if(k===2){$('#istar').classList.add('out');noise(2.5,300,.8,.25,0,'lowpass');}
-   if(k===3){storm(1);const w=[...document.querySelectorAll('#intro-stage .win')];w.forEach((x,i)=>setTimeout(()=>{x.setAttribute('fill','#1a2140');noise(.15,800,2,.05)},i*260))}}
-  if(t>D+1.2)break;await sleep(120)}
+   if(k===2)noise(2.5,300,.8,.12,0,'lowpass');
+   if(k===3)storm(1)}
+  if(t>END)break;await sleep(120)}
  if(run===introRun)goDesk()}
 $('#btn-skip').onclick=goDesk;
-function goDesk(){introRun++;hush();storm(1);startWind();renderDesk();show('#s-desk');if(st.sound){music.play().catch(()=>{})}}
-$('#btn-sound').onclick=()=>{ac();setSound(!st.sound);if(st.sound)music.play().catch(()=>{})};
+function goDesk(){introRun++;hush();try{$('#ivid').pause()}catch(e){}storm(1);startWind();renderDesk();show('#s-desk');musicOn()}
+$('#btn-sound').onclick=()=>{ac();setSound(!st.sound);musicOn()};
 setSound(st.sound);
 $('#btn-book').onclick=()=>{SFX.paper();const n=$('#numtab');n.innerHTML='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach((c,i)=>n.appendChild(el('div','','<b>'+c+'</b><br>'+(i+1))));show('#s-book')};
 $('#btn-book-back').onclick=()=>{SFX.paper();show('#s-desk')};
 
 /* ---------- Sternenhimmel und Briefe ---------- */
 const DP=hexPts(200,118,92);
-function renderSky(newD){const n=Object.keys(st.done).length;let s='<svg viewBox="0 0 400 300">'+glow('sg2')+bgStars(60,400,230,5);
+function renderSky(newD){const n=Object.keys(st.done).length;let s='<svg viewBox="0 0 400 300">'+glow('sg2')+bgStars(60,400,230,5);s+='<g opacity=".9"><circle cx="352" cy="32" r="13" fill="#f6efcf"/><circle cx="358" cy="28" r="12" fill="#14204a"/></g>';
  s+='<g transform="translate(200 118)" opacity="'+(n?0.10:0.05)+'"><path d="'+DP.map((p,i)=>(i?'L':'M')+(p[0]-200).toFixed(1)+' '+(p[1]-118).toFixed(1)).join('')+'Z" fill="none" stroke="#c9d3ff" stroke-width="1" stroke-dasharray="2 5"/></g>';
  for(let d=1;d<=24;d++){const [x,y]=DP[d-1];if(st.done[d]){s+='<g class="st-star'+(d===newD?' new':'')+'" style="transform-origin:'+x+'px '+y+'px"><circle cx="'+x+'" cy="'+y+'" r="15" fill="url(#sg2)" opacity=".85"/><text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="14" fill="#2a1d10">'+SOL[d-1]+'</text></g>'}
   else s+='<circle cx="'+x+'" cy="'+y+'" r="1.6" fill="#9fb0e6" opacity=".55"/>'}
@@ -194,17 +197,17 @@ $('#btn-case-back').onclick=()=>{hush();SFX.paper();const d=curDay;renderDesk(st
 const FP=hexPts(200,168,128);let finRun=0;
 async function finale(){const run=++finRun;hush();show('#s-final');storm(1);['#verdict','#cert-wrap','#secret-wrap'].forEach(x=>$(x).classList.remove('on'));
  const F=$('#formula');F.className='formula';F.innerHTML='';let i=0;WORDS.forEach(w=>{const g=el('div','word');for(let k=0;k<w;k++){const s=el('div','slot');s.dataset.i=i++;g.appendChild(s)}F.appendChild(g)});const slots=[...F.querySelectorAll('.slot')];
- let s='<svg viewBox="0 0 400 400" id="fsvg">'+glow('sg3')+'<defs><radialGradient id="big"><stop offset="0" stop-color="#fffbe8"/><stop offset=".25" stop-color="#ffe08a" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb92e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb92e" stop-opacity="0"/></radialGradient></defs>'+bgStars(80,400,320,9)+
+ let s='<svg viewBox="0 0 400 400" id="fsvg">'+glow('sg3')+'<defs><radialGradient id="big"><stop offset="0" stop-color="#fffbe8"/><stop offset=".25" stop-color="#ffe08a" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb92e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb92e" stop-opacity="0"/></radialGradient></defs>'+bgStars(80,400,320,9)+'<g opacity=".9"><circle cx="362" cy="34" r="13" fill="#f6efcf"/><circle cx="368" cy="30" r="12" fill="#14204a"/></g>'+
   '<g id="fblaze" opacity="0" style="transform-origin:200px 168px"><circle cx="200" cy="168" r="200" fill="url(#big)"/></g><g id="flines"></g><path id="fpoly" fill="none" stroke="#fff3c4" stroke-width="3" opacity="0"/><g id="fstars">';
  FP.forEach(([x,y],k)=>{s+='<g class="fs" data-k="'+k+'"><circle cx="'+x+'" cy="'+y+'" r="16" fill="url(#sg3)"/><text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="14" fill="#2a1d10">'+SOL[k]+'</text><text x="'+(x+(x<200?-14:14))+'" y="'+(y-12)+'" text-anchor="middle" font-family="Cinzel" font-size="10" fill="#c9d3ff" opacity=".85">'+(k+1)+'</text></g>'});
- s+='</g><g id="fcircle"></g><g transform="translate(20 310) scale(.6)" id="fcastle">'+castle(false)+'</g></svg>';$('#finsky').innerHTML=s;
+ s+='</g><circle id="fnext" cx="'+FP[0][0]+'" cy="'+FP[0][1]+'" r="21" fill="none" stroke="#9ff0b8" stroke-width="3"><animate attributeName="r" values="19;26;19" dur="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="1.3s" repeatCount="indefinite"/></circle><text id="fstart" x="'+FP[0][0]+'" y="'+(FP[0][1]-30)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="12" fill="#9ff0b8">START</text><g id="fcircle"></g><g transform="translate(20 310) scale(.6)" id="fcastle">'+castle(false)+'</g></svg>';$('#finsky').innerHTML=s;
  $('#fin-help').style.display='flex';$('#btn-auto').style.display='inline-block';
  const hint=$('#fin-hint');hint.textContent='Verbinde die Sterne der Reihe nach mit dem Finger, vom ersten bis zum vierundzwanzigsten.';
  await sleep(500);if(run!==finRun)return;say('sterne');
  const sv=$('#fsvg'),lines=$('#flines');let n=0,on=false,done=false;
  const toV=e=>{const m=sv.getScreenCTM().inverse(),p=sv.createSVGPoint();p.x=e.clientX;p.y=e.clientY;const r=p.matrixTransform(m);return [r.x,r.y]};
  const link=k=>{const a=FP[k-1],b=FP[k];const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',a[0]);l.setAttribute('y1',a[1]);l.setAttribute('x2',b[0]);l.setAttribute('y2',b[1]);l.setAttribute('stroke','#ffe9a8');l.setAttribute('stroke-width','2.5');l.setAttribute('stroke-linecap','round');lines.appendChild(l)};
- const hit=k=>{n=k+1;if(k>0)link(k);bell(523*Math.pow(2,(k%12)/12)*(k>=12?2:1),1.2,.08);const sl=slots[k];sl.textContent=SOL[k];sl.classList.add('new');const g=sv.querySelector('.fs[data-k="'+k+'"] circle');g.setAttribute('r','22');if(n===24)closeStar()};
+ const hit=k=>{n=k+1;{const nx=document.getElementById('fnext');if(n<24){nx.setAttribute('cx',FP[n][0]);nx.setAttribute('cy',FP[n][1])}else nx.style.display='none';if(n===1)document.getElementById('fstart').style.display='none'}if(k>0)link(k);bell(523*Math.pow(2,(k%12)/12)*(k>=12?2:1),1.2,.08);const sl=slots[k];sl.textContent=SOL[k];sl.classList.add('new');const g=sv.querySelector('.fs[data-k="'+k+'"] circle');g.setAttribute('r','22');if(n===24)closeStar()};
  const near=([x,y])=>{let best=-1,bd=24;FP.forEach((p,k)=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;best=k}});return best};
  let wrongT=0;
  const tryAt=e=>{if(done)return;const k=near(toV(e));if(k<0)return;if(k===n){hit(k)}else if(k>n&&performance.now()-wrongT>900){wrongT=performance.now();SFX.no();toast('Als Nächstes kommt Stern '+(n+1)+'.')}};
@@ -295,7 +298,7 @@ $('#cert-pdf').onclick=async()=>{SFX.tap();const cv=await certCanvas();const url
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Urkunde als PDF gespeichert')};
 
 // Testmodus: direkt zum Finale (nur mit gültigem probe)
-if(params.get('fin')==='1'&&params.get('probe')){$('#btn-start').textContent='Zur Sternennacht';$('#btn-start').onclick=async()=>{ac();const q=params.get('probe');if(await kzSha(q)!=='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){toast('Testmodus nicht verfügbar');return}st.act=1;for(let d=1;d<=24;d++){st.done[d]=1;st.open[d]=1}st.sealed=0;save();$('#codebox').style.display='none';startWind();if(st.sound)music.play().catch(()=>{});finale()}}
+if(params.get('fin')==='1'&&params.get('probe')){$('#btn-start').textContent='Zur Sternennacht';$('#btn-start').onclick=async()=>{ac();const q=params.get('probe');if(await kzSha(q)!=='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){toast('Testmodus nicht verfügbar');return}st.act=1;for(let d=1;d<=24;d++){st.done[d]=1;st.open[d]=1}st.sealed=0;save();$('#codebox').style.display='none';startWind();musicOn();finale()}}
 else if(Object.keys(st.open).length&&!params.get('intro')){$('#btn-start').textContent='Weiter zaubern';$('#btn-start').onclick=()=>{ac();if(st.act)goDesk();else access().then(ok=>ok&&goDesk())}}
 // Für die Rätsel
 window.Z={el,tone,bell,noise,SFX,toast,ac,sparkleAt,starPath,castle,sleep};
