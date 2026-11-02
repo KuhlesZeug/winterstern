@@ -31,12 +31,12 @@ window.WIDGETS={
   const parts=w.items.map((it,i)=>{const d=el('div','ingr','<div class="dot" style="background:'+it[1]+'">'+it[2]+'</div><small>'+it[0]+'</small>');d.style.left=(i*25)+'%';box.appendChild(d);d.dataset.i=i;return d});
   const reset=()=>{got=[];seq.textContent='';parts.forEach(p=>{p.classList.remove('used');p.style.transform=''});brew.setAttribute('fill','#6b9f5a')};
   const drop=(p)=>{const it=w.items[+p.dataset.i];p.classList.add('used');p.style.transform='';got.push(it[2]);seq.textContent=got.join(' ');SFX.bubble();brew.setAttribute('fill',it[1]);
-   if(got.length===w.items.length){const word=got.join('');if(word===w.sol){steam.textContent='🦔 '+word;steam.classList.add('on');SFX.magic();setTimeout(()=>ctx.check(word),1400)}else{SFX.no();toast('Puff! Schwarzer Rauch. Die Reihenfolge stimmt nicht.');brew.setAttribute('fill','#222');setTimeout(reset,1300)}}};
+   if(got.length===w.items.length){const word=got.join('');if(word===w.sol){steam.innerHTML=IC.hedgehog+' '+word;steam.classList.add('on');SFX.magic();setTimeout(()=>ctx.check(word),1400)}else{SFX.no();toast('Puff! Schwarzer Rauch. Die Reihenfolge stimmt nicht.');brew.setAttribute('fill','#222');setTimeout(reset,1300)}}};
   parts.forEach(p=>{let sx=0,sy=0,dr=false,moved=false;
    p.addEventListener('pointerdown',e=>{ac();dr=true;moved=false;sx=e.clientX;sy=e.clientY;p.setPointerCapture(e.pointerId)});
    p.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.hypot(dx,dy)>6)moved=true;p.style.transform='translate('+dx+'px,'+dy+'px) scale(1.1)'});
    p.addEventListener('pointerup',e=>{if(!dr)return;dr=false;const r=pot.getBoundingClientRect();const inPot=e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top-40&&e.clientY<r.bottom;if(!moved||inPot)drop(p);else p.style.transform=''})});
-  if(ctx.solved){steam.textContent='🦔 '+w.sol;steam.classList.add('on')}
+  if(ctx.solved){steam.innerHTML=IC.hedgehog+' '+w.sol;steam.classList.add('on')}
   ctx.W.append(box,seq,lab('Zieh oder tipp die Zutaten in den Kessel'));const r=btn('Kessel leeren','ghost sm');r.onclick=()=>{SFX.bubble();reset();steam.classList.remove('on')};ctx.W.appendChild(r)},
  // 3 Runenrad
  wheel(ctx){const w=ctx.D.w,A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';ctx.W.appendChild(lab('Geheime Botschaft'));ctx.W.appendChild(el('div','codeword',w.code));
@@ -48,7 +48,7 @@ window.WIDGETS={
   let rot=ctx.solved?w.key:7,drag=false,a0=0,r0=0;const draw=()=>g.setAttribute('transform','rotate('+(rot*360/26)+')');draw();
   const ang=e=>{const [x,y]=svgPt(s,e);return Math.atan2(x,-y)};
   s.addEventListener('pointerdown',e=>{ac();drag=true;a0=ang(e);r0=rot});addEventListener('pointermove',e=>{if(!drag)return;const da=(ang(e)-a0)*26/(2*Math.PI);let nr=Math.round(r0+da);nr=((nr%26)+26)%26;if(nr!==rot){rot=nr;SFX.tick();draw()}});addEventListener('pointerup',()=>drag=false);
-  ctx.W.appendChild(s);const c=el('div','ctrl');const l=el('button','btn ghost sm','⟲'),r=el('button','btn ghost sm','⟳');l.onclick=()=>{rot=(rot+25)%26;SFX.tick();draw()};r.onclick=()=>{rot=(rot+1)%26;SFX.tick();draw()};c.append(l,r);ctx.W.appendChild(c)},
+  ctx.W.appendChild(s);const c=el('div','ctrl');const l=el('button','btn ghost sm',IC.rotL),r=el('button','btn ghost sm',IC.rotR);l.onclick=()=>{rot=(rot+25)%26;SFX.tick();draw()};r.onclick=()=>{rot=(rot+1)%26;SFX.tick();draw()};c.append(l,r);ctx.W.appendChild(c)},
  // 4 Kristallkugel
  crystal(ctx){const b=el('div','ball'),sp=el('div','sphere');sp.appendChild(el('div','mw',ctx.D.w.word));b.append(sp,el('div','stand'));ctx.W.append(b,lab('Wisch die Kugel frei'));
   const sc=scratch(sp,(x,W,H)=>{const g=x.createRadialGradient(W*.4,H*.35,0,W/2,H/2,W*.6);g.addColorStop(0,'#eef3ff');g.addColorStop(1,'#a8b6da');x.fillStyle=g;x.fillRect(0,0,W,H);x.globalAlpha=.25;for(let i=0;i<60;i++){x.fillStyle='#fff';x.beginPath();x.arc(Math.random()*W,Math.random()*H,Math.random()*W*.08,0,7);x.fill()}x.globalAlpha=1},()=>{sc.clear();SFX.magic()},30);
@@ -66,8 +66,8 @@ window.WIDGETS={
   ctx.noInput=true;ctx.W.appendChild(g)},
  // 6 Porträts
  portraits(ctx){const w=ctx.D.w,f=el('div','frames'),bub=el('div','bubble','Tipp auf ein Porträt, dann spricht es.');
-  w.p.forEach(([n,ic,t])=>{const d=el('button','frame','<div class="face">'+ic+'</div><b>'+n+'</b>');d.onclick=()=>{ac();d.classList.remove('talk');void d.offsetWidth;d.classList.add('talk');bub.innerHTML='<b>'+n+':</b> „'+t+'“';for(let i=0;i<5;i++)tone(220+Math.random()*180,.08,'triangle',.05,i*.09)};f.appendChild(d)});
-  const lf=el('div','lift');w.p.forEach(([n])=>{const b=el('button','btn ghost sm','Rahmen anheben');b.onclick=()=>{if(n===w.sol){SFX.magic();b.textContent='🗝️ Schlüssel!';ctx.check('__OK__')}else{SFX.no();b.textContent='Nichts';toast('Hinter '+n+' ist nur Staub.')}};lf.appendChild(b)});
+  w.p.forEach(([n,ic,t])=>{const d=el('button','frame','<div class="face">'+IC.bust(ic)+'</div><b>'+n+'</b>');d.onclick=()=>{ac();d.classList.remove('talk');void d.offsetWidth;d.classList.add('talk');bub.innerHTML='<b>'+n+':</b> „'+t+'“';for(let i=0;i<5;i++)tone(220+Math.random()*180,.08,'triangle',.05,i*.09)};f.appendChild(d)});
+  const lf=el('div','lift');w.p.forEach(([n])=>{const b=el('button','btn ghost sm','Rahmen anheben');b.onclick=()=>{if(n===w.sol){SFX.magic();b.innerHTML=IC.key+' Schlüssel!';ctx.check('__OK__')}else{SFX.no();b.textContent='Nichts';toast('Hinter '+n+' ist nur Staub.')}};lf.appendChild(b)});
   ctx.noInput=true;ctx.W.append(f,bub,lf)},
  // 7 Treppen
  stairs(ctx){const T=[['I','L','L','L'],['L','I','I','L'],['L','I','L','I'],['I','L','L','I']];
@@ -78,8 +78,8 @@ window.WIDGETS={
   const fix={'3,0':0,'2,0':1,'2,1':1,'2,2':3,'1,2':0,'0,2':1,'0,3':3};
   if(ctx.solved)for(const k in fix){const [r,c]=k.split(',').map(Number);R[r][c]=fix[k]}
   const g=el('div','stairs');
-  const top=el('div','send top','<span></span><span></span><span></span><span class="mark goal">🚪 Sternwarte<br>▲ ZIEL</span>');
-  const bot=el('div','send bot','<span class="mark start">▲ START<br>Halle</span><span></span><span></span><span></span>');
+  const top=el('div','send top','<span></span><span></span><span></span><span class="mark goal">'+IC.door+'<br>Sternwarte<br>ZIEL</span>');
+  const bot=el('div','send bot','<span class="mark start">'+IC.up+'<br>START<br>Halle</span><span></span><span></span><span></span>');
   const DD={n:[-1,0],s:[1,0],e:[0,1],w:[0,-1]},OPP={n:'s',s:'n',e:'w',w:'e'};
   const reach=()=>{const seen=new Set();if(!op(3,0).includes('s'))return seen;seen.add('3,0');const q=[[3,0]];while(q.length){const [r,c]=q.shift();op(r,c).forEach(d=>{const nr=r+DD[d][0],nc=c+DD[d][1];if(nr<0||nr>3||nc<0||nc>3)return;if(!op(nr,nc).includes(OPP[d]))return;const k=nr+','+nc;if(!seen.has(k)){seen.add(k);q.push([nr,nc])}})}return seen};
   const draw=(b,r,c,lit)=>{const o=op(r,c);const P={n:[50,0],s:[50,100],e:[100,50],w:[0,50]};const a=P[o[0]],z=P[o[1]];const d='M'+a+' Q50 50 '+z;
@@ -90,7 +90,7 @@ window.WIDGETS={
   const redraw=()=>{const R0=reach();cells.forEach((b,i)=>draw(b,i>>2,i&3,R0.has((i>>2)+','+(i&3))))};
   let won=false;const cells=[];
   const check=()=>{const R0=reach();return R0.has('0,3')&&op(0,3).includes('n')};
-  for(let r=0;r<4;r++)for(let c=0;c<4;c++){const b=el('button','t');if(r===3&&c===0)b.classList.add('st');if(r===0&&c===3)b.classList.add('en');b.onclick=()=>{if(won)return;ac();R[r][c]++;noise(.12,500,3,.25);tone(160,.1,'sine',.15);redraw();if(check()){won=true;g.classList.add('ok');SFX.magic();top.querySelector('.goal').innerHTML='🚪✨ offen!<br>Zeichen: <b>S</b>';setTimeout(()=>ctx.check('__OK__'),900)}};g.appendChild(b);cells.push(b)}
+  for(let r=0;r<4;r++)for(let c=0;c<4;c++){const b=el('button','t');if(r===3&&c===0)b.classList.add('st');if(r===0&&c===3)b.classList.add('en');b.onclick=()=>{if(won)return;ac();R[r][c]++;noise(.12,500,3,.25);tone(160,.1,'sine',.15);redraw();if(check()){won=true;g.classList.add('ok');SFX.magic();top.querySelector('.goal').innerHTML=IC.door+'<br>Tür offen<br>Zeichen <b>S</b>';setTimeout(()=>ctx.check('__OK__'),900)}};g.appendChild(b);cells.push(b)}
   redraw();if(ctx.solved){won=true;g.classList.add('ok')}
   ctx.noInput=true;ctx.W.append(top,g,bot,lab('Leuchtende Stufen sind schon mit der Halle verbunden'))},
  // 8 Labyrinth
@@ -103,15 +103,15 @@ window.WIDGETS={
 
   const glow=(x,y,col)=>{const g0=sv('rect',{x:x+3,y:y+3,width:44,height:44,rx:8,fill:col,opacity:.35});g0.innerHTML='<animate attributeName="opacity" values=".2;.5;.2" dur="1.8s" repeatCount="indefinite"/>';s.insertBefore(g0,trail)};
   glow(0,250,'#7fe0a0');glow(250,0,'#ffd76a');
-  s.appendChild(sv('text',{x:25,y:322,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#2f7a4a'},'▲ START'));
-  s.appendChild(sv('text',{x:275,y:-12,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#9a6b14'},'ZIEL ▲'));
+  s.appendChild(sv('text',{x:25,y:322,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#2f7a4a'},'START'));
+  s.appendChild(sv('text',{x:275,y:-12,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#9a6b14'},'ZIEL'));
   s.appendChild(sv('path',{d:'M18 300 h14',stroke:'#2f7a4a','stroke-width':4}));
-  const goal=sv('text',{x:275,y:34,'text-anchor':'middle','font-size':26},'🏰');s.appendChild(goal);
+  const goal=sv('g',{transform:'translate(259 8) scale(1.35)',color:'#ffd76a'});goal.innerHTML=IC.castle.replace('<svg class="ic"','<svg width="24" height="24"');s.appendChild(goal);
   const owl=sv('image',{href:'eule.png',width:46,height:33});s.appendChild(owl);
   let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+2);owl.setAttribute('y',r*C+8)};pos();
   const D={n:[-1,0],s:[1,0],w:[0,-1],e:[0,1]};
   const mv=d=>{if(!w.open[r][c].includes(d)){SFX.no();return}trail.appendChild(sv('circle',{cx:c*C+25,cy:r*C+25,r:5,fill:'#e0b961',opacity:.5}));r+=D[d][0];c+=D[d][1];SFX.wing&&noise(.12,700,1.2,.12);pos();if(r===0&&c===5){SFX.magic();toast('Fenna ist am Turm! Welches Wort hat sie gesammelt?')}};
-  const ar=el('div','arrows');ar.innerHTML='<span></span><button data-m="n">⬆</button><span></span><button data-m="w">⬅</button><button data-m="s">⬇</button><button data-m="e">➡</button>';ar.onclick=e=>{const m=e.target.dataset.m;if(m){ac();mv(m)}};
+  const ar=el('div','arrows');ar.innerHTML='<span></span><button data-m="n">'+IC.up+'</button><span></span><button data-m="w">'+IC.left+'</button><button data-m="s">'+IC.down+'</button><button data-m="e">'+IC.right+'</button>';ar.onclick=e=>{const m=e.target.dataset.m;if(m){ac();mv(m)}};
   let sx=null,sy=null;box.addEventListener('pointerdown',e=>{ac();sx=e.clientX;sy=e.clientY});box.addEventListener('pointermove',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;const th=box.getBoundingClientRect().width/8;if(Math.abs(dx)>th||Math.abs(dy)>th){mv(Math.abs(dx)>Math.abs(dy)?(dx>0?'e':'w'):(dy>0?'s':'n'));sx=e.clientX;sy=e.clientY}});addEventListener('pointerup',()=>{sx=null});
   const rs=btn('Zurück zum Start','ghost sm');rs.onclick=()=>{r=5;c=0;trail.innerHTML='';pos()};
   ctx.W.append(box,ar,rs)},
@@ -123,8 +123,8 @@ window.WIDGETS={
   const at=e=>{const [x,y]=svgPt(s,e);return Math.atan2(x,-y)*180/Math.PI};let on=false;
   s.addEventListener('pointerdown',e=>{ac();on=true;last=at(e)});addEventListener('pointermove',e=>{if(!on)return;const a=at(e);let d=a-last;if(d>180)d-=360;if(d<-180)d+=360;last=a;if(d<0)return;ang+=d;acc+=d;draw();if(acc>=70){acc=0;const L=w.melody[ni%w.melody.length];bell(F[L],1.6,.16);ni++;if(ni%w.melody.length===0)ni+=0}});addEventListener('pointerup',()=>{on=false});
   mb.appendChild(s);ctx.W.append(mb,lab('Dreh die Kurbel im Uhrzeigersinn'));
-  const play=btn('▶ Melodie abspielen','ghost sm');play.onclick=()=>{ac();w.melody.split('').forEach((L,i)=>bell(F[L],1.5,.16,i*.6))};
-  const bs=el('div','bells');w.bells.forEach(([L,f])=>{const b=el('button','','<span>🔔</span>'+L);b.onclick=()=>{ac();bell(f,1.5,.16);b.classList.remove('ring');void b.offsetWidth;b.classList.add('ring')};bs.appendChild(b)});
+  const play=btn(IC.right+' Melodie abspielen','ghost sm');play.onclick=()=>{ac();w.melody.split('').forEach((L,i)=>bell(F[L],1.5,.16,i*.6))};
+  const bs=el('div','bells');w.bells.forEach(([L,f])=>{const b=el('button','','<span>'+IC.bell+'</span>'+L);b.onclick=()=>{ac();bell(f,1.5,.16);b.classList.remove('ring');void b.offsetWidth;b.classList.add('ring')};bs.appendChild(b)});
   ctx.W.append(lab('Die sechs Glocken'),bs,play)},
  // 10 Schneekugel
  globe(ctx){const wrap=el('div','globewrap');const s=sv('svg',{viewBox:'0 0 200 230',class:'globe'});
@@ -138,7 +138,7 @@ window.WIDGETS={
   const kick=a=>{E=Math.min(1,E+a);if(Math.random()<.5)noise(.08,5000,1,.04)};
   let lx=null,dir=0;wrap.addEventListener('pointerdown',e=>{ac();lx=e.clientX});wrap.addEventListener('pointermove',e=>{if(lx===null)return;const d=e.clientX-lx;if(Math.abs(d)>8){const nd=Math.sign(d);if(nd!==dir&&dir)kick(.14);dir=nd;lx=e.clientX}});addEventListener('pointerup',()=>{lx=null;dir=0});
   const mo=e=>{if(!document.body.contains(cv)){removeEventListener('devicemotion',mo);return}const a=e.accelerationIncludingGravity||e.acceleration;if(!a)return;const m=Math.hypot(a.x||0,a.y||0,a.z||0);if(m>16)kick((m-16)/40)};
-  const sh=btn('📱 Schütteln erlauben','ghost sm');sh.onclick=async()=>{try{if(window.DeviceMotionEvent&&DeviceMotionEvent.requestPermission)await DeviceMotionEvent.requestPermission()}catch(e){}addEventListener('devicemotion',mo);sh.textContent='Jetzt schütteln!'};
+  const sh=btn(IC.phone+' Schütteln erlauben','ghost sm');sh.onclick=async()=>{try{if(window.DeviceMotionEvent&&DeviceMotionEvent.requestPermission)await DeviceMotionEvent.requestPermission()}catch(e){}addEventListener('devicemotion',mo);sh.textContent='Jetzt schütteln!'};
   if(window.DeviceMotionEvent&&!DeviceMotionEvent.requestPermission)addEventListener('devicemotion',mo);ctx.W.appendChild(sh)},
  // 11 Kräuter Sudoku
  sudoku(ctx){const w=ctx.D.w,g=el('div','sudo'),cur=w.giv.map(r=>r.slice());if(ctx.solved)w.sol.forEach((r,i)=>cur[i]=r.slice());let won=ctx.solved;
@@ -148,20 +148,20 @@ window.WIDGETS={
     if(cur.every(row=>row.every(v=>v>0))){if(cur.every((row,i)=>row.every((v,j)=>v===w.sol[i][j]))){won=true;SFX.magic();toast('Das Beet blüht! Im goldenen Feld wächst Nessel.');setTimeout(()=>ctx.check('__OK__'),900)}else{SFX.no();toast('Irgendwo wächst ein Kraut doppelt. Prüf Reihen, Spalten und Viertel.')}}};g.appendChild(b)}
   const lg=el('div','legend');w.herbs.forEach(h=>lg.appendChild(el('span','','<i style="background:'+h[1]+'"></i>'+h[0])));ctx.noInput=true;ctx.W.append(g,lg)},
  // 12 Waage
- scale(ctx){const w=ctx.D.w;let n=ctx.solved?w.n:0;const rc=el('div','recipe','<div>🥚 Drachenei = 💎 💎 + 🌙</div><div>💎 Kristall = 🌙 🌙</div>');
+ scale(ctx){const w=ctx.D.w;let n=ctx.solved?w.n:0;const rc=el('div','recipe','<div>'+IC.egg+' Drachenei = '+IC.crystal+IC.crystal+' + '+IC.moon+'</div><div>'+IC.crystal+' Kristall = '+IC.moon+IC.moon+'</div>');
   const s=sv('svg',{viewBox:'0 0 320 210',class:'scale'});s.innerHTML='<rect x="150" y="60" width="20" height="130" fill="#7a5a26"/><rect x="100" y="186" width="120" height="14" rx="6" fill="#5a4220"/><path d="M160 46 l-12 16 h24Z" fill="#c9a24e"/>';
   const beam=sv('g',{});beam.innerHTML='<rect x="30" y="56" width="260" height="8" rx="4" fill="#c9a24e"/><line x1="50" y1="60" x2="50" y2="120" stroke="#7a5a26" stroke-width="2"/><line x1="270" y1="60" x2="270" y2="120" stroke="#7a5a26" stroke-width="2"/>';s.appendChild(beam);
   const lp=sv('g',{}),rp=sv('g',{});s.append(lp,rp);
   const draw=()=>{const tilt=Math.max(-14,Math.min(14,(w.n-n)*3));beam.setAttribute('transform','rotate('+(-tilt)+' 160 60)');const dy=Math.sin(tilt*Math.PI/180)*110;
    lp.setAttribute('transform','translate(50 '+(120+dy)+')');rp.setAttribute('transform','translate(270 '+(120-dy)+')');
-   lp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/><text y="-4" text-anchor="middle" font-size="34">🥚</text>';
-   let t='';for(let i=0;i<n;i++)t+='<text x="'+((i%4)*18-27)+'" y="'+(-4-Math.floor(i/4)*18)+'" text-anchor="middle" font-size="18">🌙</text>';rp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/>'+t;
+   lp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/><g transform="translate(0 -20)"><ellipse rx="14" ry="18" fill="#5d7a4a"/><ellipse rx="14" ry="18" fill="none" stroke="#2f4a26" stroke-width="1.5"/><path d="M-8 -4l4 3M3 -10l3 4M4 6l5 2M-7 9l3-2" stroke="#c9e0a0" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="-5" cy="-8" rx="3" ry="5" fill="#fff" opacity=".25"/></g>';
+   let t='';for(let i=0;i<n;i++)t+='<g transform="translate('+((i%4)*18-27)+' '+(-9-Math.floor(i/4)*16)+')"><circle r="7.5" fill="#dfe6ff" stroke="#8a96c8"/><circle cx="3" cy="-2" r="6" fill="#b9c4ef" opacity=".7"/></g>';rp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/>'+t;
    num.textContent=n};
   const c=el('div','ctrl');const m=el('button','btn ghost sm','− Stein'),num=el('b','',''),p=el('button','btn ghost sm','+ Stein');c.append(m,num,p);
   let tm=null;const chg=d=>{n=Math.max(0,Math.min(10,n+d));SFX.tick();tone(300+n*40,.12,'sine',.1);draw();clearTimeout(tm);if(n===w.n){tm=setTimeout(()=>{SFX.magic();toast('Die Waage steht ganz still. '+n+' Mondsteine!');setTimeout(()=>ctx.check('__OK__'),700)},700)}};
   m.onclick=()=>chg(-1);p.onclick=()=>chg(1);ctx.noInput=true;ctx.W.append(rc,s,c,numtab());draw()},
  // 13 Kerze
- candle(ctx){const cave=el('div','cave');cave.append(el('div','insc',ctx.D.w.text),el('div','dark'),el('div','flame','🕯️'));
+ candle(ctx){const cave=el('div','cave');cave.append(el('div','insc',ctx.D.w.text),el('div','dark'),el('div','flame',IC.candle));
   const set=e=>{const r=cave.getBoundingClientRect();cave.style.setProperty('--x',(e.clientX-r.left)+'px');cave.style.setProperty('--y',(e.clientY-r.top)+'px')};
   cave.addEventListener('pointerdown',e=>{ac();noise(.4,1200,.6,.08);set(e)});cave.addEventListener('pointermove',set);
   if(ctx.solved)cave.querySelector('.dark').style.display='none';ctx.W.append(cave,lab('Kerze mit dem Finger bewegen'))},
@@ -189,11 +189,11 @@ window.WIDGETS={
   ctx.noInput=true;ctx.W.append(box,lab('Ziehen bewegt das Fernrohr, tippen wählt ein Sternbild'))},
  // 15 Schloss
  lock(ctx){const w=ctx.D.w;const cl=el('div','clues');w.clues.forEach(([c,t])=>cl.appendChild(el('div','','<b>'+c+'</b><span>'+t+'</span>')));
-  const v=ctx.solved?w.code.split('').map(Number):[0,0,0];const lw=el('div','lockw');const chest=el('div','chest',ctx.solved?'🗝️':'📦');
-  v.forEach((x,i)=>{const r=el('div','ring');const u=el('button','','▲'),b=el('b','',x),d=el('button','','▼');const set=k=>{v[i]=(v[i]+k+10)%10;b.textContent=v[i];SFX.tick();tone(900,.03,'square',.03)};u.onclick=()=>set(1);d.onclick=()=>set(-1);
+  const v=ctx.solved?w.code.split('').map(Number):[0,0,0];const lw=el('div','lockw');const chest=el('div','chest',ctx.solved?IC.key:IC.chest);
+  v.forEach((x,i)=>{const r=el('div','ring');const u=el('button','',IC.up),b=el('b','',x),d=el('button','',IC.down);const set=k=>{v[i]=(v[i]+k+10)%10;b.textContent=v[i];SFX.tick();tone(900,.03,'square',.03)};u.onclick=()=>set(1);d.onclick=()=>set(-1);
    let sy=null;b.addEventListener('pointerdown',e=>{sy=e.clientY});b.addEventListener('pointermove',e=>{if(sy===null)return;if(Math.abs(e.clientY-sy)>18){set(e.clientY<sy?1:-1);sy=e.clientY}});addEventListener('pointerup',()=>sy=null);b.style.touchAction='none';
    r.append(u,b,d);lw.appendChild(r)});
-  const go=btn('Kästchen öffnen','');go.onclick=()=>{if(v.join('')===w.code){SFX.magic();chest.textContent='✨🗝️ T';chest.style.transform='scale(1.2)';ctx.check('__OK__')}else{noise(.15,400,4,.3);ctx.check('x')}};
+  const go=btn('Kästchen öffnen','');go.onclick=()=>{if(v.join('')===w.code){SFX.magic();chest.innerHTML=IC.key+'<b> T</b>';chest.style.transform='scale(1.2)';ctx.check('__OK__')}else{noise(.15,400,4,.3);ctx.check('x')}};
   ctx.noInput=true;ctx.W.append(cl,lw,go,chest)},
  // 16 Bücher
  books(ctx){const w=ctx.D.w,sh=el('div','shelf');let arr=ctx.solved?w.b.slice().sort((a,b)=>a[1]-b[1]):w.b.slice();const cols=['#6b2a3a','#2f4f96','#3f6b3a','#7a5a26'];let sel=-1;
@@ -208,20 +208,20 @@ window.WIDGETS={
   s.addEventListener('pointermove',e=>{if(!on)return;const p=svgPt(s,e);live.setAttribute('x1',P[cur][0]);live.setAttribute('y1',P[cur][1]);live.setAttribute('x2',p[0]);live.setAttribute('y2',p[1]);const k=near(p);if(k>=0&&k!==cur){add(cur,k);cur=k}});
   addEventListener('pointerup',()=>{on=false;live.setAttribute('x2',live.getAttribute('x1')||0);live.setAttribute('y2',live.getAttribute('y1')||0)});s.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
   if(ctx.solved){add(6,1);add(1,8);add(3,5)}
-  const rs=btn('Neu zeichnen','ghost sm');rs.onclick=()=>{lines.innerHTML='';SFX.whoosh()};ctx.W.append(s,lab('Muster: 7 → 2 → 9, dann 4 → 6'),rs)},
+  const rs=btn('Neu zeichnen','ghost sm');rs.onclick=()=>{lines.innerHTML='';SFX.whoosh()};ctx.W.append(s,lab('Muster: 7, 2, 9, dann 4, 6'),rs)},
  // 18 Eulen
  owls(ctx){const w=ctx.D.w,row=el('div','owlrow'),tw=el('div','towers');const place={};let sel=null;const ob={},tb={};
   w.owls.forEach(o=>{const b=el('button','owlbtn','<img src="eule.png" alt="">'+o);b.onclick=()=>{SFX.tap();sel=o;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.toggle('sel',x===b))};row.appendChild(b);ob[o]=b});
   const draw=()=>{w.towers.forEach(t=>{const who=Object.keys(place).find(o=>place[o]===t);tb[t].querySelector('.slot').innerHTML=who?'<img src="eule.png" alt="" style="width:48px"><br><small>'+who+'</small>':'';});w.owls.forEach(o=>ob[o].classList.toggle('placed',!!place[o]))};
-  w.towers.forEach(t=>{const b=el('button','tower','<div class="slot"></div><div>🏰</div><small>'+t+'</small>');b.onclick=()=>{if(!sel){toast('Tipp zuerst auf eine Eule.');return}for(const o in place)if(place[o]===t)delete place[o];place[sel]=t;SFX.wing();sel=null;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw()};tw.appendChild(b);tb[t]=b});
+  w.towers.forEach(t=>{const b=el('button','tower','<div class="slot"></div><div class="tw">'+IC.castle+'</div><small>'+t+'</small>');b.onclick=()=>{if(!sel){toast('Tipp zuerst auf eine Eule.');return}for(const o in place)if(place[o]===t)delete place[o];place[sel]=t;SFX.wing();sel=null;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw()};tw.appendChild(b);tb[t]=b});
   if(ctx.solved)Object.assign(place,w.sol);draw();
   const go=btn('Eulen losschicken','');go.onclick=()=>{if(Object.keys(place).length<3){toast('Jede Eule braucht einen Turm.');return}if(w.owls.every(o=>place[o]===w.sol[o])){SFX.magic();ctx.check('__OK__')}else ctx.check('x')};
   ctx.noInput=true;ctx.W.append(row,tw,go)},
  // 19 Laternen
  lanterns(ctx){const w=ctx.D.w,g=el('div','lanterns');const B={};let seq=[],busy=false;
   const lite=(L,ms)=>{const b=B[L];b.classList.add('lit');bell(440*Math.pow(2,'CTLAHI'.indexOf(L)/7),1,.12);setTimeout(()=>b.classList.remove('lit'),ms||500)};
-  w.l.forEach(L=>{const b=el('button','lantern','<span>🏮</span>'+L);b.onclick=()=>{if(busy)return;ac();lite(L,350);seq.push(L);const tgt=w.word.slice(0,seq.length);if(seq.join('')!==tgt){SFX.no();seq=[];toast('Die Laternen flackern und gehen aus. Lass sie noch einmal leuchten.');return}if(seq.length===w.word.length){SFX.magic();setTimeout(()=>ctx.check('__OK__'),600)}};g.appendChild(b);B[L]=b});
-  const go=btn('✨ Leuchten lassen','');go.onclick=async()=>{if(busy)return;ac();busy=true;seq=[];for(const L of w.word){await sleep(250);lite(L,550);await sleep(550)}busy=false};
+  w.l.forEach(L=>{const b=el('button','lantern','<span>'+IC.lantern+'</span>'+L);b.onclick=()=>{if(busy)return;ac();lite(L,350);seq.push(L);const tgt=w.word.slice(0,seq.length);if(seq.join('')!==tgt){SFX.no();seq=[];toast('Die Laternen flackern und gehen aus. Lass sie noch einmal leuchten.');return}if(seq.length===w.word.length){SFX.magic();setTimeout(()=>ctx.check('__OK__'),600)}};g.appendChild(b);B[L]=b});
+  const go=btn(IC.lantern+' Leuchten lassen','');go.onclick=async()=>{if(busy)return;ac();busy=true;seq=[];for(const L of w.word){await sleep(250);lite(L,550);await sleep(550)}busy=false};
   if(ctx.solved)w.word.split('').forEach(L=>B[L].classList.add('lit'));ctx.noInput=true;ctx.W.append(g,go)},
  // 20 Kreuzwort
  cross(ctx){const w=ctx.D.w,box=el('div','xw');const mg=Math.max(...w.rows.map(r=>r[1]));const all=[];
@@ -261,13 +261,13 @@ window.WIDGETS={
   g.appendChild(sv('circle',{r:44,fill:'#3b3160',stroke:'#c9a24e','stroke-width':2}));g.appendChild(sv('rect',{x:-6,y:-40,width:12,height:80,rx:6,fill:'#c9a24e'}));s.appendChild(g);
   let v=ctx.solved?w.n:0,on=false,a0=0,v0=0;const draw=()=>{g.setAttribute('transform','rotate('+(-v*360/N)+')');num.textContent=v};const ang=e=>{const [x,y]=svgPt(s,e);return Math.atan2(x,-y)};
   s.addEventListener('pointerdown',e=>{ac();on=true;a0=ang(e);v0=v});addEventListener('pointermove',e=>{if(!on)return;let d=(ang(e)-a0)*N/(2*Math.PI);let nv=Math.round(v0-d);nv=((nv%N)+N)%N;if(nv!==v){v=nv;SFX.tick();draw()}});addEventListener('pointerup',()=>on=false);
-  const num=el('b','');const c=el('div','ctrl');const l=el('button','btn ghost sm','◀'),r=el('button','btn ghost sm','▶');l.onclick=()=>{v=(v+N-1)%N;SFX.tick();draw()};r.onclick=()=>{v=(v+1)%N;SFX.tick();draw()};c.append(l,num,r);
+  const num=el('b','');const c=el('div','ctrl');const l=el('button','btn ghost sm',IC.left),r=el('button','btn ghost sm',IC.right);l.onclick=()=>{v=(v+N-1)%N;SFX.tick();draw()};r.onclick=()=>{v=(v+1)%N;SFX.tick();draw()};c.append(l,num,r);
   const go=btn('Tresor öffnen','');go.onclick=()=>{if(v===w.n){SFX.magic();noise(.5,300,2,.3);ctx.check('__OK__')}else{noise(.15,300,4,.3);ctx.check('x')}};
   ctx.noInput=true;ctx.W.append(box,c,go,numtab());draw()},
  // 24 Lichtzeichen
  blink(ctx){const sp=el('div','spark');ctx.W.appendChild(sp);let alive=true;const u=300;
   (async()=>{while(alive){for(const ch of ctx.D.w.code){if(!document.body.contains(sp)){alive=false;return}sp.classList.add('on');if(ctx._snd)tone(880,(ch==='.'?u:u*3)/1000,'sine',.06);await sleep(ch==='.'?u:u*3);sp.classList.remove('on');await sleep(u)}await sleep(u*5)}})();
-  const snd=btn('🔔 Mit Ton','ghost sm');snd.onclick=()=>{ac();ctx._snd=!ctx._snd;snd.textContent=ctx._snd?'🔕 Ohne Ton':'🔔 Mit Ton'};
+  const snd=btn(IC.bell+' Mit Ton','ghost sm');snd.onclick=()=>{ac();ctx._snd=!ctx._snd;snd.innerHTML=ctx._snd?IC.bellOff+' Ohne Ton':IC.bell+' Mit Ton'};
   const t=el('div','mtab');Object.entries(window.MORSE).forEach(([L,c])=>t.appendChild(el('div','','<b>'+L+'</b> '+c.replace(/\./g,'•').replace(/-/g,'▬'))));
   ctx.W.append(snd,lab('Lichttafel'),t)}
 };

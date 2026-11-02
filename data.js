@@ -22,7 +22,7 @@ window.DAYS = [
   q:'Welches Mondbild gehört in die Lücke? Tipp auf den richtigen Mond.', L:'E', how:'Die abnehmende Sichel trägt den Buchstaben E',
   h:['Vom Vollmond zum Neumond wird die leuchtende Fläche Bild für Bild kleiner.','Gesucht ist eine schmale Sichel, die links leuchtet.']},
  {t:'Die sprechenden Porträts', s:'Im Flur zum Westturm hängen drei sprechende Porträts. Hinter einem von ihnen ist der Schlüssel zum Archiv versteckt. Die Porträts necken Lehrlinge gern: Heute sagt nur eines von ihnen die Wahrheit.',
-  w:{k:'portraits', p:[['Gräfin Ulme','👑','Der Schlüssel ist hinter mir.'],['Ritter Rabold','🛡️','Der Schlüssel ist nicht hinter mir.'],['Magister Kauz','📜','Der Schlüssel ist nicht hinter Gräfin Ulme.']], sol:'Ritter Rabold'},
+  w:{k:'portraits', p:[['Gräfin Ulme','crown','Der Schlüssel ist hinter mir.'],['Ritter Rabold','shield','Der Schlüssel ist nicht hinter mir.'],['Magister Kauz','scroll','Der Schlüssel ist nicht hinter Gräfin Ulme.']], sol:'Ritter Rabold'},
   q:'Tipp auf jedes Porträt und hör zu. Dann tipp auf den Rahmen, hinter dem der Schlüssel steckt.', L:'R', how:'Der Schlüssel steckt hinter Ritter Rabold',
   h:['Probier jede Möglichkeit aus und zähl, wie viele Porträts dann die Wahrheit sagen.','Läge der Schlüssel bei Gräfin Ulme, sagten zwei Porträts die Wahrheit. Das darf nicht sein.']},
  {t:'Die wandernden Treppen', s:'Die Treppen im Hauptturm drehen sich, wann sie wollen. Heute musst du sie selbst ausrichten, damit ein Weg von der Halle unten links bis zur Tür der Sternwarte oben rechts entsteht.',

@@ -340,3 +340,32 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 
 .letter{margin-top:-28px}
 .owlbtn img{width:44px;height:32px;object-fit:contain}
+/* Eigene Icons */
+.ic{width:1.1em;height:1.1em;vertical-align:-.2em;display:inline-block}
+.icon .ic{width:22px;height:22px;color:var(--gold)}
+.say .ic{width:20px;height:20px;color:var(--ink)}
+.say.on .ic{color:#1a1430}
+.env .wax i .ic{width:14px;height:14px;color:#2b2340;background:#f1e4c6;border-radius:50%;padding:1px}
+.env .solvedmark .ic{width:26px;height:26px;color:var(--gold2)}
+.flystar .ic{width:44px;height:44px;vertical-align:-.12em;color:#fff3c4}
+.arrows button .ic{width:22px;height:22px;color:var(--ink)}
+.ctrl .btn .ic{width:18px;height:18px}
+.bells button span .ic{width:30px;height:30px;color:#a77a2e}
+.lantern span .ic{width:34px;height:34px;color:#6d6488;transition:color .2s}
+.lantern.lit span .ic{color:#ffd56a;filter:drop-shadow(0 0 8px #ffcf6a)}
+.lantern span{filter:none!important}
+.tower .tw .ic{width:30px;height:30px;color:#e0b961}
+.chest .ic{width:64px;height:64px;color:#a77a2e}
+.chest b{font:700 40px Cinzel,serif;color:var(--wax);vertical-align:middle}
+.cave .flame{font-size:0;width:40px;height:64px;transform:translate(-50%,-30%)}
+.cave .flame svg{width:40px;height:64px}
+.frame .face{display:flex;justify-content:center;color:#e0b961}
+.frame .bust{width:58px;height:60px}
+.recipe .ic{width:1.3em;height:1.3em;color:#7a5a26}
+.cauld .steam .ic{width:64px;height:40px;color:#fff;vertical-align:middle}
+.send .mark .ic{width:26px;height:26px}
+.mark.start{color:#2f7a4a}
+.btn .ic{width:1.05em;height:1.05em;vertical-align:-.18em}
+.ring button .ic{width:20px;height:20px;color:var(--ink)}
+.cauld .steam{color:#3c6e34;text-shadow:0 0 14px #fff,0 0 4px #fff}
+.cauld .steam .ic{color:#3c6e34;width:72px;height:45px}

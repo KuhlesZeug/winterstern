@@ -62,7 +62,7 @@ const voice=new Audio('stimmen.mp3');voice.preload='auto';let vStop=null;
 function vDone(){clearTimeout(vStop);try{voice.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on')}
 function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d]=VOX[k];const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
-function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').textContent=on?'🔊':'🔇'}
+function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').innerHTML=on?IC.sound:IC.mute}
 
 /* ---------- Schnee und Sturm ---------- */
 let STORM=1;
@@ -131,7 +131,7 @@ const SEALURL='siegel.svg';
 function renderDesk(newD){renderSky(newD);const g=$('#grid');g.innerHTML='';const td=todayNr();
  for(let d=1;d<=24;d++){const b=el('button','env');b.style.setProperty('--r',((d*37)%7-3)*.6+'deg');const u=unlocked(d);
   if(st.done[d])b.classList.add('open');else if(!u)b.classList.add('locked');if(d===td&&!st.done[d])b.classList.add('today');
-  b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?'<b class="solvedmark">★</b>':'<img src="'+SEALURL+'" alt="">'+(u?'':'<i>🔒</i>')));
+  b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?'<b class="solvedmark">'+IC.star+'</b>':'<img src="'+SEALURL+'" alt="">'+(u?'':'<i>'+IC.lock+'</i>')));
   b.onclick=()=>{if(!unlocked(d)){SFX.no();toast('Dieser Eulenbrief bleibt bis zum '+d+'. Dezember versiegelt.');return}SFX.tap();if(st.done[d]||st.open[d])openCase(d);else openEnv(d)};g.appendChild(b)}
  const n=Object.keys(st.done).length;$('#deskfoot').textContent=n===24?'Alle 24 Sterne leuchten. Öffne Brief 24 für die Sternennacht.':n+' von 24 Rätseln gelöst. Jeden Tag im Dezember bringt die Eule einen neuen Brief.'}
 
@@ -188,7 +188,7 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');setTimeout(()=>s
  $('#btn-say').onclick=()=>{if(!voice.paused){hush();return}if(st.voice===false){st.voice=true;save()}say('d'+d+'a')};
  if(st.done[d])showSolved(false);
  function showSolved(fresh){const L=D.L;sv.innerHTML='<span class="stamp2">Gelöst</span>Dein Stern leuchtet mit dem Buchstaben<b class="big">'+L+'</b><span style="font-size:16px">'+D.how+'. Er steht jetzt an deinem Sternenhimmel. An Heiligabend verbindest du alle Sterne.</span>';sv.style.display='block';
-  if(fresh){st.done[d]=1;save();SFX.ok();const fl=el('div','flystar','★ '+L);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1800);sparkleAt(sv,16);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
+  if(fresh){st.done[d]=1;save();SFX.ok();const fl=el('div','flystar',IC.star+' '+L);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1800);sparkleAt(sv,16);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
   if(d===24&&Object.keys(st.done).length===24){const fb=el('button','btn','Zur Sternennacht');fb.style.marginTop='14px';fb.onclick=finale;sv.appendChild(el('br'));sv.appendChild(fb)}
   else if(d===24){const n=24-Object.keys(st.done).length;sv.appendChild(el('p','','Dir fehlen noch '+n+' Sterne. Löse zuerst alle Rätsel, dann beginnt die Sternennacht.'))}}}
 $('#btn-case-back').onclick=()=>{hush();SFX.paper();const d=curDay;renderDesk(st.done[d]&&!st.seen?.[d]?d:0);st.seen=st.seen||{};if(st.done[d])st.seen[d]=1;save();show('#s-desk');if(st.done[d])setTimeout(()=>bell(1568,1.5,.08),500)};
@@ -276,7 +276,7 @@ async function certCanvas(){try{await document.fonts.ready}catch(e){}const W=160
  x.font='500 30px "Cormorant Garamond"';x.fillText('Meisterin Eibenhain',380,1024);x.fillText('Rabenfels',1220,1024);
  await new Promise(res=>{const im=new Image();im.onload=()=>{x.drawImage(im,690,850,220,220);res()};im.onerror=res;im.src=SEALURL});return cv}
 $('#cert-save').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Urkunde_Winterzauberei.png';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);toast('Urkunde gespeichert')},'image/png')};
-$('#cert-share').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(async b=>{const f=new File([b],'Urkunde_Winterzauberei.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Der Winterstern leuchtet!',text:'Ich habe den Winterstern von Rabenfels wieder entzündet! ✨'});return}}catch(e){if(e&&e.name==='AbortError')return}$('#cert-save').click()},'image/png')};
+$('#cert-share').onclick=async()=>{SFX.tap();const cv=await certCanvas();cv.toBlob(async b=>{const f=new File([b],'Urkunde_Winterzauberei.png',{type:'image/png'});try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Der Winterstern leuchtet!',text:'Ich habe den Winterstern von Rabenfels wieder entzündet!'});return}}catch(e){if(e&&e.name==='AbortError')return}$('#cert-save').click()},'image/png')};
 $('#final-back').onclick=()=>{hush();SFX.paper();renderDesk();show('#s-desk')};
 function kzPdf(jpg,w,h){const enc=new TextEncoder(),parts=[],offs=[];let len=0;const add=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);len+=b.length};
  const PW=842,PH=595,M=24,sc=Math.min((PW-2*M)/w,(PH-2*M)/h),dw=(w*sc).toFixed(2),dh=(h*sc).toFixed(2),dx=((PW-w*sc)/2).toFixed(2),dy=((PH-h*sc)/2).toFixed(2);
@@ -300,6 +300,7 @@ $('#cert-pdf').onclick=async()=>{SFX.tap();const cv=await certCanvas();const url
 // Testmodus: direkt zum Finale (nur mit gültigem probe)
 if(params.get('fin')==='1'&&params.get('probe')){$('#btn-start').textContent='Zur Sternennacht';$('#btn-start').onclick=async()=>{ac();const q=params.get('probe');if(await kzSha(q)!=='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){toast('Testmodus nicht verfügbar');return}st.act=1;for(let d=1;d<=24;d++){st.done[d]=1;st.open[d]=1}st.sealed=0;save();$('#codebox').style.display='none';startWind();musicOn();finale()}}
 else if(Object.keys(st.open).length&&!params.get('intro')){$('#btn-start').textContent='Weiter zaubern';$('#btn-start').onclick=()=>{ac();if(st.act)goDesk();else access().then(ok=>ok&&goDesk())}}
+$('#btn-book').innerHTML=IC.book;$('#btn-say').innerHTML=IC.sound;
 // Für die Rätsel
 window.Z={el,tone,bell,noise,SFX,toast,ac,sparkleAt,starPath,castle,sleep};
 window.ZDEBUG={finale,openCase,openEnv,st,save,renderDesk,show};

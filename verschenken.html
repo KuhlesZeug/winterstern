@@ -60,7 +60,7 @@ $('#make').onclick=async()=>{const c=kzNormCode($('#code').value);if(!c||await k
  const an=$('#an').value.trim(),von=$('#von').value.trim(),m=$('#m').value.trim(),s=$('#s').value.trim();if(!an){toast('Bitte trag ein, für wen der Kalender ist.');return}
  const k=await kzSig(an,von,kzMsg(m,s));const o={an,von,m,k};if(s)o.s=kzHide(s);const url=new URL('./',location.href).href+'?g='+kzEnc(o);
  $('#link').textContent=url;$('#out').style.display='block';$('#test').href=url;
- const txt='Eulenpost für dich, '+an+'! 🦉✨ Im Dezember bringt dir jeden Tag eine Eule ein magisches Rätsel aus der Akademie zu Rabenfels. Am Ende entzündest du den Winterstern. Am besten mit Ton: '+url;
+ const txt='Eulenpost für dich, '+an+'! Im Dezember bringt dir jeden Tag eine Eule ein magisches Rätsel aus der Akademie zu Rabenfels. Am Ende entzündest du den Winterstern. Am besten mit Ton: '+url;
  $('#wa').href='https://wa.me/?text='+encodeURIComponent(txt);$('#out').scrollIntoView({behavior:'smooth'})};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#link').textContent);toast('Link kopiert')}catch(e){toast('Bitte den Link markieren und kopieren')}};
 </script>
