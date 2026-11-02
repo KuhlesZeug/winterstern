@@ -70,11 +70,15 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 #s-env{background:radial-gradient(ellipse at 50% 30%,#1d2b62,#070c22 75%)}
 .env-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(30px + env(safe-area-inset-top)) 14px 30px}
 .env-date{font-family:Cinzel,serif;color:var(--gold);letter-spacing:.1em;font-size:15px;margin-bottom:6px;text-align:center}
-.owl{font-size:64px;line-height:1;height:70px;transform:translate(-120vw,-30px) rotate(-10deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.5))}
+.owl{width:min(64vw,250px);height:min(45vw,176px);transform:translate(-120vw,-30px) rotate(-10deg);filter:drop-shadow(0 14px 18px rgba(0,0,0,.45));pointer-events:none;position:relative;z-index:4}
+.owl img{width:100%;height:100%;object-fit:contain;transform-origin:50% 60%;animation:flap .42s ease-in-out infinite alternate}
+@keyframes flap{from{transform:scaleY(1) translateY(0)}to{transform:scaleY(.93) translateY(5px)}}
+.owl.rest img{animation:hover 1.6s ease-in-out infinite alternate}
+@keyframes hover{from{transform:translateY(0) rotate(-1deg)}to{transform:translateY(-8px) rotate(1.5deg)}}
 .owl.fly{animation:owlfly 1.6s cubic-bezier(.2,.8,.25,1) forwards}
 .owl.away{animation:owlaway 1.3s ease-in forwards}
-@keyframes owlfly{0%{transform:translate(-120vw,-60px) rotate(-12deg)}55%{transform:translate(8vw,-20px) rotate(8deg)}100%{transform:translate(0,0) rotate(0)}}
-@keyframes owlaway{to{transform:translate(120vw,-120px) rotate(14deg)}}
+@keyframes owlfly{0%{transform:translate(-110vw,-120px) scale(.45) rotate(-14deg)}60%{transform:translate(6vw,-14px) scale(1.04) rotate(6deg)}100%{transform:translate(0,0) scale(1) rotate(0)}}
+@keyframes owlaway{0%{transform:translate(0,0) scale(1)}100%{transform:translate(115vw,-60vh) scale(.5) rotate(12deg)}}
 .letter{position:relative;width:min(92vw,380px);aspect-ratio:4/3;margin-top:6px;opacity:0;transform:translateY(-40px) scale(.7)}
 .letter.in{animation:letterin .9s .9s ease forwards}
 @keyframes letterin{to{opacity:1;transform:none}}
@@ -295,7 +299,7 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .rankpick button.sel{background:var(--gold);color:#1a1430}
 .secret-wrap{display:none;text-align:center;margin:26px 0 10px}
 .secret-wrap.on{display:block;animation:fadein 1s}
-.secret-wrap .owlbig{font-size:60px}
+.secret-wrap .owlbig img{width:min(56vw,220px);filter:drop-shadow(0 10px 14px rgba(0,0,0,.5));animation:hover 1.6s ease-in-out infinite alternate}
 .secret-q{font-size:20px;margin:6px 0 2px}
 .secret-from{font-style:italic;color:var(--gold);margin:0 0 10px}
 #s-secret{background:radial-gradient(ellipse at 50% 20%,#1d2b62,#050818 75%)}
@@ -333,3 +337,6 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .ivid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#040716}
 .ivig{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,7,22,.75) 0,rgba(4,7,22,.2) 30%,transparent 55%,rgba(4,7,22,.35) 100%);pointer-events:none}
 .intro-text{top:12%;z-index:2}
+
+.letter{margin-top:-28px}
+.owlbtn img{width:44px;height:32px;object-fit:contain}

@@ -141,7 +141,7 @@ let curDay=0,trace=null;
 function openEnv(d){curDay=d;const L=$('#letter'),O=$('#owl');L.className='letter';O.className='owl';void L.offsetWidth;
  $('#env-date').textContent=d==='secret'?'Persönlich für '+(gift&&gift.an||'dich'):d+'. Dezember';$('#lt-card').textContent=d==='secret'?'Persönlich':'Eulenbrief';
  $('#env-hint').textContent='Die Eule bringt deinen Brief …';$('#env-hint').style.visibility='visible';show('#s-env');
- O.classList.add('fly');L.classList.add('in');SFX.wing();setTimeout(()=>{O.classList.remove('fly');O.classList.add('away');O.style.transform='none'},1700);
+ O.style.transform='';O.classList.add('fly');L.classList.add('in');SFX.wing();setTimeout(()=>{if(curDay!==d)return;O.classList.remove('fly');O.style.transform='none';O.classList.add('rest')},1650);setTimeout(()=>{if(curDay!==d)return;O.classList.remove('rest');O.classList.add('away');SFX.wing()},3300);
  const pts=d==='secret'?RUNES[9]:RUNES[(d-1)%9];buildRune(pts);setTimeout(()=>{if(curDay===d)$('#env-hint').textContent='Fahr mit dem Finger die leuchtende Rune auf dem Siegel nach'},1800)}
 function buildRune(pts){const R=$('#rune');R.className='rune';
  const samp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1],len=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(len/3));for(let k=0;k<n;k++)samp.push([x1+(x2-x1)*k/n,y1+(y2-y1)*k/n])}samp.push(pts[pts.length-1]);

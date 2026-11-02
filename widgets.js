@@ -107,8 +107,8 @@ window.WIDGETS={
   s.appendChild(sv('text',{x:275,y:-12,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#9a6b14'},'ZIEL ▲'));
   s.appendChild(sv('path',{d:'M18 300 h14',stroke:'#2f7a4a','stroke-width':4}));
   const goal=sv('text',{x:275,y:34,'text-anchor':'middle','font-size':26},'🏰');s.appendChild(goal);
-  const owl=sv('text',{x:25,y:284,'text-anchor':'middle','font-size':28},'🦉');s.appendChild(owl);
-  let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+25);owl.setAttribute('y',r*C+34)};pos();
+  const owl=sv('image',{href:'eule.png',width:46,height:33});s.appendChild(owl);
+  let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+2);owl.setAttribute('y',r*C+8)};pos();
   const D={n:[-1,0],s:[1,0],w:[0,-1],e:[0,1]};
   const mv=d=>{if(!w.open[r][c].includes(d)){SFX.no();return}trail.appendChild(sv('circle',{cx:c*C+25,cy:r*C+25,r:5,fill:'#e0b961',opacity:.5}));r+=D[d][0];c+=D[d][1];SFX.wing&&noise(.12,700,1.2,.12);pos();if(r===0&&c===5){SFX.magic();toast('Fenna ist am Turm! Welches Wort hat sie gesammelt?')}};
   const ar=el('div','arrows');ar.innerHTML='<span></span><button data-m="n">⬆</button><span></span><button data-m="w">⬅</button><button data-m="s">⬇</button><button data-m="e">➡</button>';ar.onclick=e=>{const m=e.target.dataset.m;if(m){ac();mv(m)}};
@@ -211,8 +211,8 @@ window.WIDGETS={
   const rs=btn('Neu zeichnen','ghost sm');rs.onclick=()=>{lines.innerHTML='';SFX.whoosh()};ctx.W.append(s,lab('Muster: 7 → 2 → 9, dann 4 → 6'),rs)},
  // 18 Eulen
  owls(ctx){const w=ctx.D.w,row=el('div','owlrow'),tw=el('div','towers');const place={};let sel=null;const ob={},tb={};
-  w.owls.forEach(o=>{const b=el('button','owlbtn','<span>🦉</span>'+o);b.onclick=()=>{SFX.tap();sel=o;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.toggle('sel',x===b))};row.appendChild(b);ob[o]=b});
-  const draw=()=>{w.towers.forEach(t=>{const who=Object.keys(place).find(o=>place[o]===t);tb[t].querySelector('.slot').innerHTML=who?'🦉<br><small>'+who+'</small>':'';});w.owls.forEach(o=>ob[o].classList.toggle('placed',!!place[o]))};
+  w.owls.forEach(o=>{const b=el('button','owlbtn','<img src="eule.png" alt="">'+o);b.onclick=()=>{SFX.tap();sel=o;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.toggle('sel',x===b))};row.appendChild(b);ob[o]=b});
+  const draw=()=>{w.towers.forEach(t=>{const who=Object.keys(place).find(o=>place[o]===t);tb[t].querySelector('.slot').innerHTML=who?'<img src="eule.png" alt="" style="width:48px"><br><small>'+who+'</small>':'';});w.owls.forEach(o=>ob[o].classList.toggle('placed',!!place[o]))};
   w.towers.forEach(t=>{const b=el('button','tower','<div class="slot"></div><div>🏰</div><small>'+t+'</small>');b.onclick=()=>{if(!sel){toast('Tipp zuerst auf eine Eule.');return}for(const o in place)if(place[o]===t)delete place[o];place[sel]=t;SFX.wing();sel=null;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw()};tw.appendChild(b);tb[t]=b});
   if(ctx.solved)Object.assign(place,w.sol);draw();
   const go=btn('Eulen losschicken','');go.onclick=()=>{if(Object.keys(place).length<3){toast('Jede Eule braucht einen Turm.');return}if(w.owls.every(o=>place[o]===w.sol[o])){SFX.magic();ctx.check('__OK__')}else ctx.check('x')};
