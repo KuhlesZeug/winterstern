@@ -294,7 +294,9 @@ $('#cert-pdf').onclick=async()=>{SFX.tap();const cv=await certCanvas();const url
  try{const f=new File([blob],name,{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[f]})&&/iPhone|iPad|Android/i.test(navigator.userAgent)){await navigator.share({files:[f],title:'Urkunde Winterzauberei'});return}}catch(e){if(e&&e.name==='AbortError')return}
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Urkunde als PDF gespeichert')};
 
-if(Object.keys(st.open).length&&!params.get('intro')){$('#btn-start').textContent='Weiter zaubern';$('#btn-start').onclick=()=>{ac();if(st.act)goDesk();else access().then(ok=>ok&&goDesk())}}
+// Testmodus: direkt zum Finale (nur mit gültigem probe)
+if(params.get('fin')==='1'&&params.get('probe')){$('#btn-start').textContent='Zur Sternennacht';$('#btn-start').onclick=async()=>{ac();const q=params.get('probe');if(await kzSha(q)!=='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){toast('Testmodus nicht verfügbar');return}st.act=1;for(let d=1;d<=24;d++){st.done[d]=1;st.open[d]=1}st.sealed=0;save();$('#codebox').style.display='none';startWind();if(st.sound)music.play().catch(()=>{});finale()}}
+else if(Object.keys(st.open).length&&!params.get('intro')){$('#btn-start').textContent='Weiter zaubern';$('#btn-start').onclick=()=>{ac();if(st.act)goDesk();else access().then(ok=>ok&&goDesk())}}
 // Für die Rätsel
 window.Z={el,tone,bell,noise,SFX,toast,ac,sparkleAt,starPath,castle,sleep};
 window.ZDEBUG={finale,openCase,openEnv,st,save,renderDesk,show};

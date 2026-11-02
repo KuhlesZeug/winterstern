@@ -18,7 +18,7 @@ h1,h2,h3{font-family:Cinzel,serif;font-weight:700}
 /* Start */
 #s-start{background:radial-gradient(ellipse at 50% 18%,#26346b 0,#0b1330 45%,#060a1e 80%)}
 .start-sky{position:absolute;inset:0;overflow:hidden}
-.start-sky svg{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:max(100%,760px);height:auto}
+.start-sky svg{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:max(100%,760px);height:auto;max-height:52vh}
 .start-in{position:relative;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:calc(56px + env(safe-area-inset-top)) 22px 40px}
 h1{font-size:34px;line-height:1.12;margin:12px 0 6px;text-shadow:0 4px 30px #000;letter-spacing:.02em}
 h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-family:'Cinzel Decorative',Cinzel,serif}
