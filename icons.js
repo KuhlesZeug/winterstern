@@ -29,3 +29,8 @@ window.IC={
   return '<svg class="bust" viewBox="0 0 60 62" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+head+acc+'</svg>'}
 };
 })();
+// gemalte Bildicons (Higgsfield) fuer Motive; Bedienelemente bleiben Linienicons
+(function(){const I=(n,c)=>'<img class="zimg'+(c?' '+c:'')+'" src="ic/'+n+'.webp" alt="" draggable="false">';
+ IC.castleLine=IC.castle;
+ Object.assign(IC,{lantern:I('lantern'),bell:I('bell'),castle:I('castle'),door:I('door'),egg:I('egg'),crystal:I('crystal'),moon:I('moon'),hedgehog:I('hedgehog'),chest:I('chest'),candle:I('candle'),key:I('zkey'),moonstone:I('moonstone'),potion:I('potion'),quill:I('quill'),
+  bust:function(kind){return I({crown:'pcountess',shield:'pknight',scroll:'pscholar'}[kind]||'pscholar','bust')}});})();

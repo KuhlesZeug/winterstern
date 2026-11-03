@@ -106,7 +106,7 @@ window.WIDGETS={
   s.appendChild(sv('text',{x:25,y:322,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#2f7a4a'},'START'));
   s.appendChild(sv('text',{x:275,y:-12,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':16,fill:'#9a6b14'},'ZIEL'));
   s.appendChild(sv('path',{d:'M18 300 h14',stroke:'#2f7a4a','stroke-width':4}));
-  const goal=sv('g',{transform:'translate(259 8) scale(1.35)',color:'#ffd76a'});goal.innerHTML=IC.castle.replace('<svg class="ic"','<svg width="24" height="24"');s.appendChild(goal);
+  const goal=sv('g',{transform:'translate(259 8) scale(1.35)',color:'#ffd76a'});goal.innerHTML=IC.castleLine.replace('<svg class="ic"','<svg width="24" height="24"');s.appendChild(goal);
   const owl=sv('image',{href:'eule.png',width:46,height:33});s.appendChild(owl);
   let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+2);owl.setAttribute('y',r*C+8)};pos();
   const D={n:[-1,0],s:[1,0],w:[0,-1],e:[0,1]};
@@ -148,14 +148,14 @@ window.WIDGETS={
     if(cur.every(row=>row.every(v=>v>0))){if(cur.every((row,i)=>row.every((v,j)=>v===w.sol[i][j]))){won=true;SFX.magic();toast('Das Beet blüht! Im goldenen Feld wächst Nessel.');setTimeout(()=>ctx.check('__OK__'),900)}else{SFX.no();toast('Irgendwo wächst ein Kraut doppelt. Prüf Reihen, Spalten und Viertel.')}}};g.appendChild(b)}
   const lg=el('div','legend');w.herbs.forEach(h=>lg.appendChild(el('span','','<i style="background:'+h[1]+'"></i>'+h[0])));ctx.noInput=true;ctx.W.append(g,lg)},
  // 12 Waage
- scale(ctx){const w=ctx.D.w;let n=ctx.solved?w.n:0;const rc=el('div','recipe','<div>'+IC.egg+' Drachenei = '+IC.crystal+IC.crystal+' + '+IC.moon+'</div><div>'+IC.crystal+' Kristall = '+IC.moon+IC.moon+'</div>');
+ scale(ctx){const w=ctx.D.w;let n=ctx.solved?w.n:0;const rc=el('div','recipe','<div>'+IC.egg+' Drachenei = '+IC.crystal+IC.crystal+' + '+IC.moonstone+'</div><div>'+IC.crystal+' Kristall = '+IC.moonstone+IC.moonstone+'</div>');
   const s=sv('svg',{viewBox:'0 0 320 210',class:'scale'});s.innerHTML='<rect x="150" y="60" width="20" height="130" fill="#7a5a26"/><rect x="100" y="186" width="120" height="14" rx="6" fill="#5a4220"/><path d="M160 46 l-12 16 h24Z" fill="#c9a24e"/>';
   const beam=sv('g',{});beam.innerHTML='<rect x="30" y="56" width="260" height="8" rx="4" fill="#c9a24e"/><line x1="50" y1="60" x2="50" y2="120" stroke="#7a5a26" stroke-width="2"/><line x1="270" y1="60" x2="270" y2="120" stroke="#7a5a26" stroke-width="2"/>';s.appendChild(beam);
   const lp=sv('g',{}),rp=sv('g',{});s.append(lp,rp);
   const draw=()=>{const tilt=Math.max(-14,Math.min(14,(w.n-n)*3));beam.setAttribute('transform','rotate('+(-tilt)+' 160 60)');const dy=Math.sin(tilt*Math.PI/180)*110;
    lp.setAttribute('transform','translate(50 '+(120+dy)+')');rp.setAttribute('transform','translate(270 '+(120-dy)+')');
-   lp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/><g transform="translate(0 -20)"><ellipse rx="14" ry="18" fill="#5d7a4a"/><ellipse rx="14" ry="18" fill="none" stroke="#2f4a26" stroke-width="1.5"/><path d="M-8 -4l4 3M3 -10l3 4M4 6l5 2M-7 9l3-2" stroke="#c9e0a0" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="-5" cy="-8" rx="3" ry="5" fill="#fff" opacity=".25"/></g>';
-   let t='';for(let i=0;i<n;i++)t+='<g transform="translate('+((i%4)*18-27)+' '+(-9-Math.floor(i/4)*16)+')"><circle r="7.5" fill="#dfe6ff" stroke="#8a96c8"/><circle cx="3" cy="-2" r="6" fill="#b9c4ef" opacity=".7"/></g>';rp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/>'+t;
+   lp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/><image href="ic/egg.webp" x="-22" y="-46" width="44" height="46"/>';
+   let t='';for(let i=0;i<n;i++)t+='<image href="ic/moonstone.webp" x="'+((i%4)*18-27-9)+'" y="'+(-9-Math.floor(i/4)*16-9)+'" width="18" height="18"/>';rp.innerHTML='<path d="M-40 0 h80 l-10 14 h-60Z" fill="#c9a24e"/>'+t;
    num.textContent=n};
   const c=el('div','ctrl');const m=el('button','btn ghost sm','− Stein'),num=el('b','',''),p=el('button','btn ghost sm','+ Stein');c.append(m,num,p);
   let tm=null;const chg=d=>{n=Math.max(0,Math.min(10,n+d));SFX.tick();tone(300+n*40,.12,'sine',.1);draw();clearTimeout(tm);if(n===w.n){tm=setTimeout(()=>{SFX.magic();toast('Die Waage steht ganz still. '+n+' Mondsteine!');setTimeout(()=>ctx.check('__OK__'),700)},700)}};

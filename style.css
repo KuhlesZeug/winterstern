@@ -370,3 +370,17 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .cauld .steam{color:#3c6e34;text-shadow:0 0 14px #fff,0 0 4px #fff}
 .cauld .steam .ic{color:#3c6e34;width:72px;height:45px}
 .secret-letter{padding:36px 26px 28px}.secret-letter .kick{padding:0 34px;text-align:center}.secret-letter h2{text-align:center}
+
+/* gemalte Bildicons */
+.zimg{width:1.5em;height:1.5em;object-fit:contain;display:inline-block;vertical-align:middle;-webkit-user-drag:none;user-select:none}
+.btn .zimg{width:1.5em;height:1.5em;margin:-4px 2px -4px 0}
+.bells button span .zimg{width:44px;height:44px}
+.lantern span .zimg{width:52px;height:52px;filter:grayscale(.7) brightness(.85) contrast(1.1);opacity:.85;transition:filter .3s,opacity .3s}
+.lantern.lit span .zimg{opacity:1}
+.lantern.lit span .zimg{filter:drop-shadow(0 0 10px #ffcf6a) brightness(1.1)}
+.tower .tw .zimg{width:46px;height:46px}
+.chest .zimg{width:84px;height:84px}
+.frame img.bust{width:70px;height:70px;object-fit:contain}
+.recipe .zimg{width:1.7em;height:1.7em}
+.cauld .steam .zimg{width:64px;height:64px;filter:drop-shadow(0 0 8px #fff)}
+.send .mark .zimg{width:30px;height:30px}
