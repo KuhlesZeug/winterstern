@@ -58,7 +58,7 @@ function setWind(v){if(windG&&AC)windG.gain.setTargetAtTime(.035*v,AC.currentTim
 const music=$('#music');const MV=.2,MD=.06;let mG=null;
 function musicOn(){if(!st.sound)return;const c=ac();if(!mG){try{const src=c.createMediaElementSource(music);mG=c.createGain();mG.gain.value=(voice&&!voice.paused)?MD:MV;src.connect(mG);mG.connect(master)}catch(e){music.volume=.15}}music.play().catch(()=>{})}
 function mVol(v){if(mG&&AC)mG.gain.setTargetAtTime(v,AC.currentTime,.3)}
-const voice=new Audio('stimmen.mp3');voice.preload='auto';let vStop=null,vx=null;
+const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=null;
 function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on')}
 function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
