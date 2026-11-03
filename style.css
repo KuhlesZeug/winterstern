@@ -384,3 +384,10 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .recipe .zimg{width:1.7em;height:1.7em}
 .cauld .steam .zimg{width:64px;height:64px;filter:drop-shadow(0 0 8px #fff)}
 .send .mark .zimg{width:30px;height:30px}
+
+/* Startseite: Schneeeule mit Eulenpost */
+.start-owl{position:relative;width:clamp(190px,62vw,280px);margin:2px auto 6px;pointer-events:none}
+.start-owl::before{content:"";position:absolute;left:10%;right:10%;top:15%;bottom:0;background:radial-gradient(ellipse,rgba(200,215,255,.22) 0,transparent 65%)}
+.start-owl img{position:relative;width:100%;height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.55));animation:owlfly 6s ease-in-out infinite;transform-origin:50% 60%}
+@keyframes owlfly{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-9px) rotate(1.5deg)}}
+@media (max-height:700px){.start-owl{width:150px;margin:0 auto 2px}}
