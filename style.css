@@ -620,3 +620,8 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .start-sky{background-position:30% 45%}
 #s-start .codebox{background:rgba(8,12,34,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(233,199,123,.35);border-radius:16px;padding:14px 14px 8px;width:min(100%,360px)}
 #s-start .codebox input{background:rgba(255,255,255,.08)}
+/* Winterstern im Startbild sichtbar zwischen Titel und Codefeld */
+.start-sky{top:15vh;background:#0b1330 url(z/start.jpg) 50% 0/cover no-repeat!important}
+#s-start{background:#0b1330 url(z/start.jpg) 50% 0/100% auto no-repeat}
+#s-start::before{content:'';position:absolute;inset:0;background:#0b1330}
+.start-sky::after{background:linear-gradient(180deg,rgba(11,19,48,1) 0%,rgba(11,19,48,.35) 10%,rgba(8,12,34,.02) 24%,rgba(8,12,34,0) 52%,rgba(8,12,34,.75) 82%,rgba(8,12,34,.94) 100%)!important}
