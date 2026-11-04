@@ -84,8 +84,8 @@ function sayBtn(src,b){if(b.classList.contains('on')){hush();return}if(!st.sound
 function witRow(d){const old=document.querySelector('#s-case .wits');if(old)old.remove();const L=WIT[d];if(!L)return;const r=el('div','wits');r.appendChild(el('span','wlab','Hör mal, wer da spricht'));
  L.forEach(([k,n,ic])=>{const b=el('button','wchip','<span class="wpor"><img src="'+ic+'" alt=""></span><span class="wn">'+n+'</span><span class="wsp">'+IC.sound+'</span>');b.onclick=()=>sayBtn('v/c_'+k+'.mp3',b);r.appendChild(b)});
  $('#c-story').after(r)}
-const AMBMAP={2:'kessel',12:'kessel',3:'sternwarte',5:'sternwarte',14:'sternwarte',7:'sturm',8:'sturm',24:'sturm',11:'gewaechshaus',13:'keller',16:'bibliothek',18:'hof',19:'hof'},AMBV=.5,ABUF={};let ambSrc=null,ambG2=null,ambTok=0;
-function ambLoad(n){if(!ABUF[n]){const c=ac();ABUF[n]=fetch('o/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>new Promise((res,rej)=>c.decodeAudioData(b,res,rej)))}return ABUF[n]}
+const AMBMAP={2:'kessel',12:'kessel',3:'sternwarte',5:'sternwarte',14:'sternwarte',7:'sturm',8:'sturm',24:'sturm',11:'gewaechshaus',13:'keller',16:'bibliothek',18:'hof',19:'hof'},AMBV=.4,ABUF={};let ambSrc=null,ambG2=null,ambTok=0;
+function ambLoad(n){if(!ABUF[n]){const c=ac();ABUF[n]=fetch('o/'+n+'.mp3?v=2').then(r=>r.arrayBuffer()).then(b=>new Promise((res,rej)=>c.decodeAudioData(b,res,rej)))}return ABUF[n]}
 function placeAmb(n){const c=ac(),tok=++ambTok;if(ambSrc){const s=ambSrc,g=ambG2;g.gain.setTargetAtTime(0,c.currentTime,.35);setTimeout(()=>{try{s.stop()}catch(e){}},1800);ambSrc=null;ambG2=null}
  if(windG)windG.gain.setTargetAtTime(n?0:.035*STORM,c.currentTime,.6);if(!n)return;
  ambLoad(n).then(buf=>{if(tok!==ambTok)return;const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.loopStart=.03;s.loopEnd=buf.duration-.03;const g=c.createGain();g.gain.value=0;s.connect(g);g.connect(master);s.start(0,.03);g.gain.setTargetAtTime(AMBV,c.currentTime,.6);ambSrc=s;ambG2=g}).catch(()=>{})}
