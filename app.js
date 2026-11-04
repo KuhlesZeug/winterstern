@@ -78,6 +78,12 @@ const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=
 function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on');document.querySelectorAll('.wchip.on,.grim.on').forEach(x=>x.classList.remove('on'))}
 function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
+/* Hinweiskarten */
+function hintCard(d,n){document.querySelectorAll('.hcard').forEach(x=>x.remove());const V=window.HVIS||{},k=d+'_'+n;if(!V[k])return;
+ const b=el('button','hcard','<span class="hthumb">'+V[k]+'</span><span class="hlab">'+(window.HVIS_WHO||'Skizze')+'<small>Zum Vergrößern antippen</small></span>');
+ b.onclick=()=>{SFX.paper();const z=el('div','hzoom','<div class="hzin">'+V[k]+'<span class="hzx">Schließen</span></div>');z.onclick=()=>{z.classList.remove('on');setTimeout(()=>z.remove(),250)};document.body.appendChild(z);requestAnimationFrame(()=>z.classList.add('on'))};
+ $('#c-hint').after(b)}
+
 /* Figuren, Fennas Reaktion, Ortsgeräusche */
 const WIT={2:[['kessler2','Meister Kessler','z/o_kessel.webp']],4:[['wahrsagerin','Die Wahrsagerin','z/o_kugel_gross.webp']],5:[['silberhaar5','Professor Silberhaar','z/o_fernrohr.webp']],8:[['fenna8','Fenna','z/o_eule_fenna.webp']],11:[['gaertnerin','Die Gärtnerin','z/o_k_salbei.webp']],12:[['kessler12','Meister Kessler','z/o_kessel.webp']],14:[['silberhaar14','Professor Silberhaar','z/o_fernrohr.webp']],16:[['bibliothekarin','Die Bibliothekarin','z/o_buecher.webp']],21:[['kobold','Der Kobold','z/o_flasche_lila.webp']],23:[['schatzmeister','Der Schatzmeister','z/o_tresorrad.webp']]};
 function sayBtn(src,b){if(b.classList.contains('on')){hush();return}if(!st.sound){toast('Schalte oben den Ton ein, dann hörst du die Stimme.');return}const a=clip(src);if(!a)return;b.classList.add('on');a.addEventListener('ended',()=>b.classList.remove('on'),{once:true})}
@@ -212,7 +218,7 @@ function typeText(node,txt,cb){clearInterval(typer);node.innerHTML='';let i=0;co
  node.onclick=()=>{if(i<txt.length){clearInterval(typer);i=txt.length;node.textContent=txt;cb&&cb()}}}
 const norm=s=>(s||'').toUpperCase().replace(/Ä/g,'AE').replace(/Ö/g,'OE').replace(/Ü/g,'UE').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'');
 function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setTimeout(()=>say('d'+d+'a'),400);placeAmb(AMBMAP[d]);
- $('#c-date').textContent=d+'. Dezember';$('#c-nr').textContent=d;$('#c-title').textContent=D.t;$('#c-q').textContent=D.q;$('#c-hint').textContent='';
+ $('#c-date').textContent=d+'. Dezember';$('#c-nr').textContent=d;$('#c-title').textContent=D.t;$('#c-q').textContent=D.q;$('#c-hint').textContent='';document.querySelectorAll('.hcard').forEach(x=>x.remove());
  const sv=$('#c-solved');sv.style.display='none';
  const W=$('#c-widget');W.innerHTML='';const A=$('#c-answer');A.innerHTML='';
  const ctx={d,D,W,A,solved:!!st.done[d]};
@@ -223,13 +229,13 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setT
  try{(window.WIDGETS[D.w.k]||function(){})(ctx)}catch(e){console.error(e)}
  if(D.a&&!ctx.noInput){const inp=el('input');inp.placeholder='Lösung';inp.autocomplete='off';inp.setAttribute('autocapitalize','characters');inp.setAttribute('autocorrect','off');inp.spellcheck=false;
   const b=el('button','btn','Prüfen');b.onclick=()=>check(inp.value);inp.onkeydown=e=>{if(e.key==='Enter')check(inp.value)};A.append(inp,b);ctx.input=inp}
- $('#btn-h1').onclick=()=>{SFX.paper();$('#c-hint').textContent='Meisterin Eibenhain: '+D.h[0];say('d'+d+'h1')};
- $('#btn-h2').onclick=()=>{SFX.paper();$('#c-hint').textContent='Meisterin Eibenhain: '+D.h[1];say('d'+d+'h2')};
+ $('#btn-h1').onclick=()=>{SFX.paper();$('#c-hint').textContent='Meisterin Eibenhain: '+D.h[0];say('d'+d+'h1');hintCard(d,1)};
+ $('#btn-h2').onclick=()=>{SFX.paper();$('#c-hint').textContent='Meisterin Eibenhain: '+D.h[1];say('d'+d+'h2');hintCard(d,2)};
  $('#btn-say').onclick=()=>{if(!voice.paused){hush();return}if(st.voice===false){st.voice=true;save()}say('d'+d+'a')};
  if(st.done[d])showSolved(false);
  function showSolved(fresh){const L=D.L;sv.innerHTML='<span class="stamp2">Gelöst</span>Dein Stern leuchtet mit dem Buchstaben<b class="big">'+L+'</b><span style="font-size:16px">'+D.how+'. Er steht jetzt an deinem Sternenhimmel. An Heiligabend verbindest du alle Sterne.</span>';sv.style.display='block';
   if(fresh){st.done[d]=1;save();SFX.ok();const fl=el('div','flystar',IC.star+' '+L);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1800);sparkleAt(sv,16);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
-  const rOk=d!==24||Object.keys(st.done).length===24;if(rOk){const gb=el('button','grim','<img src="z/o_eule_fenna.webp" alt=""><span>Fenna</span>'+IC.sound);gb.onclick=()=>sayBtn('v/r'+d+'.mp3',gb);sv.appendChild(gb);if(fresh&&st.sound&&st.voice!==false)setTimeout(()=>{if(curDay===d&&$('#s-case').classList.contains('on')&&!gb.classList.contains('on'))sayBtn('v/r'+d+'.mp3',gb)},1500)}
+  const rf=(d===24&&Object.keys(st.done).length<24)?'v/r24b.mp3':'v/r'+d+'.mp3';{const gb=el('button','grim','<img src="z/o_eule_fenna.webp" alt=""><span>Fenna</span>'+IC.sound);gb.onclick=()=>sayBtn(rf,gb);sv.appendChild(gb);if(fresh&&st.sound&&st.voice!==false)setTimeout(()=>{if(curDay===d&&$('#s-case').classList.contains('on')&&!gb.classList.contains('on'))sayBtn(rf,gb)},1500)}
   if(d===24&&Object.keys(st.done).length===24){const fb=el('button','btn','Zur Sternennacht');fb.style.marginTop='14px';fb.onclick=finale;sv.appendChild(el('br'));sv.appendChild(fb)}
   else if(d===24){const n=24-Object.keys(st.done).length;sv.appendChild(el('p','','Dir fehlen noch '+n+' Sterne. Löse zuerst alle Rätsel, dann beginnt die Sternennacht.'))}}}
 $('#btn-case-back').onclick=()=>{hush();placeAmb(null);SFX.paper();const d=curDay;renderDesk(st.done[d]&&!st.seen?.[d]?d:0);st.seen=st.seen||{};if(st.done[d])st.seen[d]=1;save();show('#s-desk');if(st.done[d])setTimeout(()=>bell(1568,1.5,.08),500)};

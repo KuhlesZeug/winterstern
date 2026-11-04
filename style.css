@@ -651,3 +651,16 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .solved .grim .ic{color:var(--gold)}
 .solved .grim.on{background:rgba(224,185,97,.22)}
 .grim img{width:36px;height:36px;border-radius:50%;object-fit:contain;background:radial-gradient(circle at 50% 40%,#fff6df,#e6d6b2);border:1px solid rgba(184,137,58,.6);padding:2px}
+/* Hinweiskarten */
+.hcard{display:flex;align-items:center;gap:12px;width:100%;margin:10px 0 2px;padding:6px 12px 6px 6px;background:rgba(255,250,238,.78);border:1.5px solid rgba(184,137,58,.55);border-radius:12px;text-align:left;color:var(--ink);box-shadow:0 3px 10px rgba(20,15,40,.15);animation:hcin .35s ease-out}
+.hcard .hthumb{flex:none;width:100px;transform:rotate(-2deg);box-shadow:0 2px 8px rgba(0,0,0,.25);border-radius:6px;line-height:0}
+.hcard .hthumb svg{width:100%;height:auto}
+.hcard .hlab{font:700 18px 'Cormorant Garamond',Georgia,serif}.hcard small{display:block;font:italic 500 15px 'Cormorant Garamond',Georgia,serif;color:#5b4a7a;margin-top:2px}
+.hcard:active{transform:scale(.98)}
+@keyframes hcin{from{opacity:0;transform:translateY(-6px)}}
+.hzoom{position:fixed;inset:0;z-index:9000;background:rgba(6,10,30,.84);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;transition:opacity .25s}
+.hzoom.on{opacity:1}
+.hzin{width:min(96vw,760px);text-align:center;transform:scale(.94);transition:transform .3s}
+.hzoom.on .hzin{transform:none}
+.hzin svg{width:100%;height:auto;box-shadow:0 18px 50px rgba(0,0,0,.6);border-radius:10px}
+.hzx{display:inline-block;margin-top:14px;color:#f6e8c4;font:700 17px 'Cormorant Garamond',Georgia,serif;border:1px solid rgba(224,185,97,.6);border-radius:999px;padding:6px 18px}
