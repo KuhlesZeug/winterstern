@@ -24,7 +24,7 @@ async function access(){await ready;if(st.act)return true;const v=kzNormCode($('
 let TOFF=0;
 (async()=>{try{const r=await fetch(location.pathname+'?t='+Date.now(),{method:'HEAD',cache:'no-store'});const d=Date.parse(r.headers.get('date'));if(d){TOFF=d-Date.now();if($('#s-desk').classList.contains('on'))renderDesk()}}catch(e){}})();
 function berlin(){const p=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date(Date.now()+TOFF));const o={};p.forEach(x=>o[x.type]=+x.value);return o}
-let PROBE=false;(async()=>{const q=params.get('probe');if(q&&await kzSha(q)==='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){PROBE=true;if($('#s-desk').classList.contains('on'))renderDesk()}})();
+let PROBE=false;(async()=>{const q=params.get('probe');if(q&&await kzSha(q)==='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){PROBE=true;window.__kz={openCase:d=>openCase(d),openEnv:d=>openEnv(d),runeDone:()=>runeDone(),finale:()=>finale()};if($('#s-desk').classList.contains('on'))renderDesk()}})();
 function unlocked(d){if(PROBE)return true;const b=berlin();if(b.month===12)return b.day>=d;if(b.month===1)return true;return false}
 function todayNr(){const b=berlin();return b.month===12&&b.day<=24?b.day:0}
 const ORD=['Erster','Zweiter','Dritter','Vierter','Fünfter','Sechster','Siebter','Achter','Neunter','Zehnter','Elfter','Zwölfter','Dreizehnter','Vierzehnter','Fünfzehnter','Sechzehnter','Siebzehnter','Achtzehnter','Neunzehnter','Zwanzigster','Einundzwanzigster','Zweiundzwanzigster','Dreiundzwanzigster','Vierundzwanzigster'];
@@ -49,6 +49,14 @@ const SFX={
  whoosh(){const c=ac();const r=noise(.8,500,1.5,.3);r.bf.frequency.exponentialRampToValueAtTime(3000,c.currentTime+.7)},
  chime(){[0,.35,.7,1.05].forEach((t,i)=>bell([1047,1319,1568,2093][i],2,.1,t))}
 };
+// Echte Geräusche (ElevenLabs), synthetische Töne bleiben als Rückfall
+const SBUF={};const SNAMES=['book','bubble','candle','click','crystal','globe','hoot','lantern','lock','paper','plop','quill','seal','stone','success','twinkle','wand','wing','wrong'];
+function sload(){const c=ac();SNAMES.forEach(n=>{if(SBUF[n]!==undefined)return;SBUF[n]=null;fetch('s/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>c.decodeAudioData(b)).then(d=>{SBUF[n]=d}).catch(()=>{})})}
+function smp(n,v,rate){const c=ac();if(!SBUF[n]){sload();return false}const s=c.createBufferSource();s.buffer=SBUF[n];if(rate)s.playbackRate.value=rate;const g=c.createGain();g.gain.value=v||.8;s.connect(g);g.connect(master);s.start();return true}
+(()=>{const o={...SFX};const M={paper:['paper',.9],magic:['success',.75],ok:['success',.9],no:['wrong',.7],wing:['wing',.8],seal:['seal',.9],bubble:['plop',.8],tick:['click',.6],whoosh:['wand',.8],chime:['twinkle',.7]};
+ Object.keys(M).forEach(k=>{SFX[k]=function(){const [n,v]=M[k];if(!smp(n,v,k==='tick'?1+Math.random()*.15:0))o[k]&&o[k]()}});
+ ['crystal','stone','globe','candle','lock','hoot','lantern','book','quill','twinkle','plop','wand','success'].forEach(n=>{SFX[n]=(v)=>smp(n,v||.8)})})();
+document.addEventListener('pointerdown',()=>{try{sload()}catch(e){}},{once:true});
 // Wind im Hintergrund
 let windG=null;
 function startWind(){if(windG)return;const c=ac();const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.996+(Math.random()*2-1)*.03;x[i]=l}
@@ -62,6 +70,7 @@ const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=
 function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on')}
 function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
+function clip(src){vDone();if(!st.sound)return null;vx=new Audio(src);mVol(MD);vx.addEventListener('ended',()=>mVol(MV),{once:true});vx.play().catch(()=>{});return vx}
 function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').innerHTML=on?IC.sound:IC.mute}
 
 /* ---------- Schnee und Sturm ---------- */
@@ -71,6 +80,18 @@ let STORM=1;
  (function loop(t){cx.clearRect(0,0,W,H);cx.fillStyle='rgba(255,255,255,.8)';const n=Math.round(40+80*STORM);
   for(let i=0;i<n;i++){const p=fl[i];p.y+=p.s/600*(1+STORM*1.6);p.x+=(STORM*.0025+.0002)*(.6+p.k);if(p.y>1.02){p.y=-.02;p.x=Math.random()}if(p.x>1.05)p.x=-.05;const x=(p.x+Math.sin(t/2000+p.w)*.008)*W;cx.beginPath();cx.arc(x,p.y*H,p.r*devicePixelRatio,0,7);cx.fill()}requestAnimationFrame(loop)})(0)})();
 function storm(v){STORM=v;setWind(v)}
+
+
+/* ---------- Pip, das Eulenküken (Suchspiel) ---------- */
+const PIPPOS=[['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%']];
+const PIPV=['v/pip1.mp3','v/pip2.mp3','v/pip3.mp3','v/pip4.mp3'];
+function pipCount(){return Object.keys(st.pip||{}).length}
+function placePip(d){const paper=$('#s-case .paper');let p=$('#pip');if(p)p.remove();const [pose,css]=PIPPOS[(d-1)%24];
+ p=el('button','pip'+((st.pip||{})[d]?' found':''));p.id='pip';p.setAttribute('aria-label','Pip');p.style.cssText=css;p.innerHTML='<img src="ic/pip_'+pose+'.webp" alt="">';
+ p.onclick=e=>{e.stopPropagation();ac();st.pip=st.pip||{};const neu=!st.pip[d];st.pip[d]=1;save();p.classList.remove('hop');void p.offsetWidth;p.classList.add('hop','found');
+  clip(PIPV[(d+(neu?0:1))%PIPV.length]);
+  sparkleAt(p,14);if(neu)toast('Pip gefunden! '+pipCount()+' von 24')};
+ paper.appendChild(p)}
 
 /* ---------- Burg, Sterne ---------- */
 function castle(win){let s='<g fill="#070b1d"><path d="M0 222 L0 190 Q150 160 300 166 Q450 160 600 186 L600 222Z"/>'+
@@ -120,12 +141,12 @@ $('#btn-book-back').onclick=()=>{SFX.paper();show('#s-desk')};
 
 /* ---------- Sternenhimmel und Briefe ---------- */
 const DP=hexPts(200,118,92);
-function renderSky(newD){const n=Object.keys(st.done).length;let s='<svg viewBox="0 0 400 300">'+glow('sg2')+bgStars(60,400,230,5);s+='<g opacity=".9"><circle cx="352" cy="32" r="13" fill="#f6efcf"/><circle cx="358" cy="28" r="12" fill="#14204a"/></g>';
+function renderSky(newD){const n=Object.keys(st.done).length;let s='<svg viewBox="0 0 400 300">'+glow('sg2')+bgStars(60,400,230,5);
  s+='<g transform="translate(200 118)" opacity="'+(n?0.10:0.05)+'"><path d="'+DP.map((p,i)=>(i?'L':'M')+(p[0]-200).toFixed(1)+' '+(p[1]-118).toFixed(1)).join('')+'Z" fill="none" stroke="#c9d3ff" stroke-width="1" stroke-dasharray="2 5"/></g>';
  for(let d=1;d<=24;d++){const [x,y]=DP[d-1];if(st.done[d]){s+='<g class="st-star'+(d===newD?' new':'')+'" style="transform-origin:'+x+'px '+y+'px"><circle cx="'+x+'" cy="'+y+'" r="15" fill="url(#sg2)" opacity=".85"/><text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="14" fill="#2a1d10">'+SOL[d-1]+'</text></g>'}
   else s+='<circle cx="'+x+'" cy="'+y+'" r="1.6" fill="#9fb0e6" opacity=".55"/>'}
- s+='<g transform="translate(40 232) scale(.533)">'+castle(n>=24)+'</g></svg>';$('#skybox').innerHTML=s;
- $('#skylab').textContent=n?'Dein Sternenhimmel · '+n+' von 24 Sternen leuchten':'Dein Sternenhimmel · noch ist es dunkel'}
+ s+='</svg>';const sb=$('#skybox');sb.innerHTML=s;sb.classList.toggle('lit',n>=24);sb.style.setProperty('--glow',(0.15+0.85*n/24).toFixed(2));
+ $('#skylab').textContent=n?'Dein Sternenhimmel · '+n+' von 24 Sternen leuchten':'Dein Sternenhimmel · noch ist es dunkel';const pc=pipCount();$('#skylab').innerHTML+=pc?' <span class="pipc"><img src="ic/pip_wave.webp" alt="">'+pc+'</span>':''}
 function sealSVG(){return '<svg viewBox="-50 -50 100 100"><circle r="44" fill="url(#wx)"/><defs><radialGradient id="wx" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#4766b8"/><stop offset="1" stop-color="#14204f"/></radialGradient></defs><circle r="34" fill="none" stroke="#e0b961" stroke-width="2" opacity=".7"/><path d="'+starPath(22,8)+'" fill="#e0b961"/></svg>'}
 const SEALURL='siegel.svg';
 function renderDesk(newD){renderSky(newD);const g=$('#grid');g.innerHTML='';const td=todayNr();
@@ -139,15 +160,15 @@ function renderDesk(newD){renderSky(newD);const g=$('#grid');g.innerHTML='';cons
 const RUNES=[[[65,10],[35,40],[65,60],[35,90]],[[66,14],[34,50],[66,86]],[[36,90],[36,12],[68,30],[36,48],[68,64]],[[50,10],[80,50],[50,90],[20,50],[50,10]],[[36,90],[36,10],[66,26],[36,46],[68,90]],[[30,90],[30,10],[70,35],[70,90]],[[50,92],[50,10],[22,38]],[[20,16],[80,84],[80,16],[20,84],[20,16]],[[40,90],[40,10],[70,34]],[[50,8],[76,90],[8,38],[92,38],[24,90],[50,8]]];
 let curDay=0,trace=null;
 function openEnv(d){curDay=d;const L=$('#letter'),O=$('#owl');L.className='letter';O.className='owl';void L.offsetWidth;
- $('#env-date').textContent=d==='secret'?'Persönlich für '+(gift&&gift.an||'dich'):d+'. Dezember';$('#lt-card').textContent=d==='secret'?'Persönlich':'Eulenbrief';
- $('#env-hint').textContent='Die Eule bringt deinen Brief …';$('#env-hint').style.visibility='visible';show('#s-env');
+ $('#env-date').textContent=d==='secret'?'Persönlich für '+(gift&&gift.an||'dich'):d+'. Dezember';$('#lt-card').innerHTML='<i class="lc-orn"></i><small>Akademie zu Rabenfels</small><b>'+(d==='secret'?'Persönlich':'Eulenbrief')+'</b><em>'+(d==='secret'?'nur für dich':'Nr. '+d+' · '+d+'. Dezember')+'</em><span>An meine lieben Lehrlinge</span><i class="lc-orn lc-b"></i>';
+ $('#env-hint').textContent='Die Eule bringt deinen Brief …';$('#env-hint').style.visibility='visible';show('#s-env');if(st.sound)smp('wind',.45);
  O.style.transform='';O.classList.add('fly');L.classList.add('in');SFX.wing();setTimeout(()=>{if(curDay!==d)return;O.classList.remove('fly');O.style.transform='none';O.classList.add('rest')},1650);setTimeout(()=>{if(curDay!==d)return;O.classList.remove('rest');O.classList.add('away');SFX.wing()},3300);
  const pts=d==='secret'?RUNES[9]:RUNES[(d-1)%9];buildRune(pts);setTimeout(()=>{if(curDay===d)$('#env-hint').textContent='Fahr mit dem Finger die leuchtende Rune auf dem Siegel nach'},1800)}
 function buildRune(pts){const R=$('#rune');R.className='rune';
  const samp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1],len=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(len/3));for(let k=0;k<n;k++)samp.push([x1+(x2-x1)*k/n,y1+(y2-y1)*k/n])}samp.push(pts[pts.length-1]);
  const d='M'+pts.map(p=>p.join(' ')).join(' L');
  R.innerHTML='<svg viewBox="-10 -10 120 120"><defs><radialGradient id="wx2" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#4c6cc2"/><stop offset="1" stop-color="#121c48"/></radialGradient><filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+
- '<path d="M50 -6 C78 -8 104 18 106 46 C108 78 84 106 52 106 C18 108 -6 82 -6 50 C-8 20 20 -4 50 -6Z" fill="url(#wx2)" stroke="#0b1236" stroke-width="2"/><circle cx="50" cy="50" r="47" fill="none" stroke="#e0b961" stroke-width="1.2" opacity=".55"/>'+
+ '<image href="z/siegel_blau.webp" x="-14" y="-14" width="128" height="128"/>'+
  '<path d="'+d+'" fill="none" stroke="#e0b961" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".28"/>'+
  '<path id="rprog" d="'+d+'" fill="none" stroke="#fff3c4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl)"/>'+
  '<circle id="rdot" r="7" fill="#fff3c4" filter="url(#gl)"><animate attributeName="r" values="5;9;5" dur="1.2s" repeatCount="indefinite"/></circle></svg>';
@@ -162,7 +183,7 @@ function buildRune(pts){const R=$('#rune');R.className='rune';
  sv.addEventListener('pointerdown',dn);sv.addEventListener('pointermove',mv);addEventListener('pointerup',up);sv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false})}
 function runeDone(){if(!trace||trace.done)return;trace.done=true;const R=$('#rune'),L=$('#letter');$('#env-hint').style.visibility='hidden';SFX.magic();if(navigator.vibrate)navigator.vibrate([20,40,60]);sparkleAt(R,22);
  setTimeout(()=>{SFX.seal();R.classList.add('broken')},500);setTimeout(()=>{SFX.paper();L.classList.add('opened')},1300);
- setTimeout(()=>{if(curDay==='secret'){showSecret();return}st.open[curDay]=1;save();openCase(curDay)},2700)}
+ setTimeout(()=>{if(curDay==='secret'){showSecret();return}st.open[curDay]=1;save();openCase(curDay)},3900)}
 $('#btn-env-back').onclick=()=>{if(curDay==='secret'){show('#s-final');return}renderDesk();show('#s-desk')};
 
 /* ---------- Rätselseite ---------- */
@@ -171,7 +192,7 @@ function typeText(node,txt,cb){clearInterval(typer);node.innerHTML='';let i=0;co
  typer=setInterval(()=>{if(i>=txt.length){clearInterval(typer);cur.remove();cb&&cb();return}cur.before(txt[i]);if(txt[i]!==' '&&i%3===0)noise(.025,6000,4,.05);i++},20);
  node.onclick=()=>{if(i<txt.length){clearInterval(typer);i=txt.length;node.textContent=txt;cb&&cb()}}}
 const norm=s=>(s||'').toUpperCase().replace(/Ä/g,'AE').replace(/Ö/g,'OE').replace(/Ü/g,'UE').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'');
-function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');setTimeout(()=>say('d'+d+'a'),400);
+function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setTimeout(()=>say('d'+d+'a'),400);
  $('#c-date').textContent=d+'. Dezember';$('#c-nr').textContent=d;$('#c-title').textContent=D.t;$('#c-q').textContent=D.q;$('#c-hint').textContent='';
  const sv=$('#c-solved');sv.style.display='none';
  const W=$('#c-widget');W.innerHTML='';const A=$('#c-answer');A.innerHTML='';
@@ -197,10 +218,10 @@ $('#btn-case-back').onclick=()=>{hush();SFX.paper();const d=curDay;renderDesk(st
 const FP=hexPts(200,168,128);let finRun=0;
 async function finale(){const run=++finRun;hush();show('#s-final');storm(1);['#verdict','#cert-wrap','#secret-wrap'].forEach(x=>$(x).classList.remove('on'));
  const F=$('#formula');F.className='formula';F.innerHTML='';let i=0;WORDS.forEach(w=>{const g=el('div','word');for(let k=0;k<w;k++){const s=el('div','slot');s.dataset.i=i++;g.appendChild(s)}F.appendChild(g)});const slots=[...F.querySelectorAll('.slot')];
- let s='<svg viewBox="0 0 400 400" id="fsvg">'+glow('sg3')+'<defs><radialGradient id="big"><stop offset="0" stop-color="#fffbe8"/><stop offset=".25" stop-color="#ffe08a" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb92e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb92e" stop-opacity="0"/></radialGradient></defs>'+bgStars(80,400,320,9)+'<g opacity=".9"><circle cx="362" cy="34" r="13" fill="#f6efcf"/><circle cx="368" cy="30" r="12" fill="#14204a"/></g>'+
+ let s='<svg viewBox="0 0 400 400" id="fsvg">'+glow('sg3')+'<defs><radialGradient id="big"><stop offset="0" stop-color="#fffbe8"/><stop offset=".25" stop-color="#ffe08a" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb92e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb92e" stop-opacity="0"/></radialGradient></defs>'+'<image href="z/t_himmel.jpg" x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMax slice"/><rect id="fdim" width="400" height="400" fill="#0b1230" opacity=".45"/>'+bgStars(40,400,260,9)+
   '<g id="fblaze" opacity="0" style="transform-origin:200px 168px"><circle cx="200" cy="168" r="200" fill="url(#big)"/></g><g id="flines"></g><path id="fpoly" fill="none" stroke="#fff3c4" stroke-width="3" opacity="0"/><g id="fstars">';
  FP.forEach(([x,y],k)=>{s+='<g class="fs" data-k="'+k+'"><circle cx="'+x+'" cy="'+y+'" r="16" fill="url(#sg3)"/><text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="14" fill="#2a1d10">'+SOL[k]+'</text><text x="'+(x+(x<200?-14:14))+'" y="'+(y-12)+'" text-anchor="middle" font-family="Cinzel" font-size="10" fill="#c9d3ff" opacity=".85">'+(k+1)+'</text></g>'});
- s+='</g><circle id="fnext" cx="'+FP[0][0]+'" cy="'+FP[0][1]+'" r="21" fill="none" stroke="#9ff0b8" stroke-width="3"><animate attributeName="r" values="19;26;19" dur="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="1.3s" repeatCount="indefinite"/></circle><text id="fstart" x="'+FP[0][0]+'" y="'+(FP[0][1]-30)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="12" fill="#9ff0b8">START</text><g id="fcircle"></g><g transform="translate(20 310) scale(.6)" id="fcastle">'+castle(false)+'</g></svg>';$('#finsky').innerHTML=s;
+ s+='</g><circle id="fnext" cx="'+FP[0][0]+'" cy="'+FP[0][1]+'" r="21" fill="none" stroke="#9ff0b8" stroke-width="3"><animate attributeName="r" values="19;26;19" dur="1.3s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;.4;1" dur="1.3s" repeatCount="indefinite"/></circle><text id="fstart" x="'+FP[0][0]+'" y="'+(FP[0][1]-30)+'" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="12" fill="#9ff0b8">START</text><g id="fcircle"></g><g id="fcastle"></g></svg>';$('#finsky').innerHTML=s;
  $('#fin-help').style.display='flex';$('#btn-auto').style.display='inline-block';
  const hint=$('#fin-hint');hint.textContent='Verbinde die Sterne der Reihe nach mit dem Finger, vom ersten bis zum vierundzwanzigsten.';
  await sleep(500);if(run!==finRun)return;say('sterne');
@@ -231,7 +252,7 @@ async function blaze(run){const b=$('#fblaze'),g=$('#fcircle');$('#fin-hint').te
  b.style.transition='opacity 2.2s';b.setAttribute('opacity','1');b.animate([{transform:'scale(.2)'},{transform:'scale(1)'}],{duration:2200,easing:'ease-out'});
  setTimeout(()=>SFX.chime(),400);sparkleAt($('#finsky'),40);
  let v=1;const iv=setInterval(()=>{v=Math.max(.06,v-.05);storm(v);if(v<=.06)clearInterval(iv)},140);
- await sleep(1600);const w=[...document.querySelectorAll('#fcastle .win')];w.forEach((x,i)=>setTimeout(()=>{x.setAttribute('fill',x.tagName==='path'?'#c98f3a':'#ffcf6a');tone(800+i*60,.4,'sine',.03)},i*180));
+ await sleep(1600);{const fd=document.getElementById('fdim');if(fd){fd.style.transition='opacity 3s';fd.style.opacity='.05'}}const w=[...document.querySelectorAll('#fcastle .win')];w.forEach((x,i)=>setTimeout(()=>{x.setAttribute('fill',x.tagName==='path'?'#c98f3a':'#ffcf6a');tone(800+i*60,.4,'sine',.03)},i*180));
  await sleep(2200);if(run!==finRun)return;verdict()}
 function verdict(){const v=$('#verdict');const said=say('fin');
  v.innerHTML='<div class="kick" style="color:var(--gold2);text-align:center">Rabenfels · Heiligabend</div><h2 style="text-align:center;margin:6px 0">Der Winterstern leuchtet</h2><p class="story">Der Sturm legt sich, und in allen Fenstern von Rabenfels gehen die Lichter an. Über dem höchsten Turm strahlt der Winterstern so hell wie seit tausend Wintern nicht mehr.</p><p class="story">Meisterin Eibenhain lässt ausrichten: Ohne dich wäre es in dieser Nacht dunkel geblieben. Sie ist sehr stolz auf dich.</p><p class="story center"><b>Frohe Weihnachten!</b></p>'+(gift&&gift.von?'<p class="story center" style="font-size:16px">Diesen Zauber hat dir '+esc(gift.von)+' geschenkt.</p>':'');
@@ -302,6 +323,6 @@ if(params.get('fin')==='1'&&params.get('probe')){$('#btn-start').textContent='Zu
 else if(Object.keys(st.open).length&&!params.get('intro')){$('#btn-start').textContent='Weiter zaubern';$('#btn-start').onclick=()=>{ac();if(st.act)goDesk();else access().then(ok=>ok&&goDesk())}}
 $('#btn-book').innerHTML=IC.book;$('#btn-say').innerHTML=IC.sound;
 // Für die Rätsel
-window.Z={el,tone,bell,noise,SFX,toast,ac,sparkleAt,starPath,castle,sleep};
+window.Z={el,tone,bell,noise,SFX,toast,ac,sparkleAt,starPath,castle,sleep,clip};
 window.ZDEBUG={finale,openCase,openEnv,st,save,renderDesk,show};
 })();
