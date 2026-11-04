@@ -75,9 +75,20 @@ document.addEventListener('pointerdown',()=>{if(st.sound&&$('#s-desk').classList
 function musicOn(){if(!st.sound)return;const c=ac();if(!mG){try{const src=c.createMediaElementSource(music);mG=c.createGain();mG.gain.value=(voice&&!voice.paused)?MD:MV;src.connect(mG);mG.connect(master)}catch(e){music.volume=.15}}music.play().catch(()=>{})}
 function mVol(v){if(mG&&AC)mG.gain.setTargetAtTime(v,AC.currentTime,.3)}
 const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=null;
-function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on')}
+function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on');document.querySelectorAll('.wchip.on,.grim.on').forEach(x=>x.classList.remove('on'))}
 function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
+/* Figuren, Fennas Reaktion, Ortsgeräusche */
+const WIT={2:[['kessler2','Meister Kessler','z/o_kessel.webp']],4:[['wahrsagerin','Die Wahrsagerin','z/o_kugel_gross.webp']],5:[['silberhaar5','Professor Silberhaar','z/o_fernrohr.webp']],8:[['fenna8','Fenna','z/o_eule_fenna.webp']],11:[['gaertnerin','Die Gärtnerin','z/o_k_salbei.webp']],12:[['kessler12','Meister Kessler','z/o_kessel.webp']],14:[['silberhaar14','Professor Silberhaar','z/o_fernrohr.webp']],16:[['bibliothekarin','Die Bibliothekarin','z/o_buecher.webp']],21:[['kobold','Der Kobold','z/o_flasche_lila.webp']],23:[['schatzmeister','Der Schatzmeister','z/o_tresorrad.webp']]};
+function sayBtn(src,b){if(b.classList.contains('on')){hush();return}if(!st.sound){toast('Schalte oben den Ton ein, dann hörst du die Stimme.');return}const a=clip(src);if(!a)return;b.classList.add('on');a.addEventListener('ended',()=>b.classList.remove('on'),{once:true})}
+function witRow(d){const old=document.querySelector('#s-case .wits');if(old)old.remove();const L=WIT[d];if(!L)return;const r=el('div','wits');r.appendChild(el('span','wlab','Hör mal, wer da spricht'));
+ L.forEach(([k,n,ic])=>{const b=el('button','wchip','<span class="wpor"><img src="'+ic+'" alt=""></span><span class="wn">'+n+'</span><span class="wsp">'+IC.sound+'</span>');b.onclick=()=>sayBtn('v/c_'+k+'.mp3',b);r.appendChild(b)});
+ $('#c-story').after(r)}
+const AMBMAP={2:'kessel',12:'kessel',3:'sternwarte',5:'sternwarte',14:'sternwarte',7:'sturm',8:'sturm',24:'sturm',11:'gewaechshaus',13:'keller',16:'bibliothek',18:'hof',19:'hof'},AMBV=.5,ABUF={};let ambSrc=null,ambG2=null,ambTok=0;
+function ambLoad(n){if(!ABUF[n]){const c=ac();ABUF[n]=fetch('o/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>new Promise((res,rej)=>c.decodeAudioData(b,res,rej)))}return ABUF[n]}
+function placeAmb(n){const c=ac(),tok=++ambTok;if(ambSrc){const s=ambSrc,g=ambG2;g.gain.setTargetAtTime(0,c.currentTime,.35);setTimeout(()=>{try{s.stop()}catch(e){}},1800);ambSrc=null;ambG2=null}
+ if(windG)windG.gain.setTargetAtTime(n?0:.035*STORM,c.currentTime,.6);if(!n)return;
+ ambLoad(n).then(buf=>{if(tok!==ambTok)return;const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.loopStart=.03;s.loopEnd=buf.duration-.03;const g=c.createGain();g.gain.value=0;s.connect(g);g.connect(master);s.start(0,.03);g.gain.setTargetAtTime(AMBV,c.currentTime,.6);ambSrc=s;ambG2=g}).catch(()=>{})}
 function clip(src){vDone();if(!st.sound)return null;vx=new Audio(src);mVol(MD);vx.addEventListener('ended',()=>mVol(MV),{once:true});vx.play().catch(()=>{});return vx}
 function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').innerHTML=on?IC.sound:IC.mute}
 
@@ -200,7 +211,7 @@ function typeText(node,txt,cb){clearInterval(typer);node.innerHTML='';let i=0;co
  typer=setInterval(()=>{if(i>=txt.length){clearInterval(typer);cur.remove();cb&&cb();return}cur.before(txt[i]);if(txt[i]!==' '&&i%3===0)noise(.025,6000,4,.05);i++},20);
  node.onclick=()=>{if(i<txt.length){clearInterval(typer);i=txt.length;node.textContent=txt;cb&&cb()}}}
 const norm=s=>(s||'').toUpperCase().replace(/Ä/g,'AE').replace(/Ö/g,'OE').replace(/Ü/g,'UE').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'');
-function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setTimeout(()=>say('d'+d+'a'),400);
+function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setTimeout(()=>say('d'+d+'a'),400);placeAmb(AMBMAP[d]);
  $('#c-date').textContent=d+'. Dezember';$('#c-nr').textContent=d;$('#c-title').textContent=D.t;$('#c-q').textContent=D.q;$('#c-hint').textContent='';
  const sv=$('#c-solved');sv.style.display='none';
  const W=$('#c-widget');W.innerHTML='';const A=$('#c-answer');A.innerHTML='';
@@ -208,7 +219,7 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setT
  function check(v){const ok=v==='__OK__'||(D.a||[]).some(a=>norm(a)===norm(v));
   if(ok){if(!st.done[d])showSolved(true);return true}SFX.no();const p=$('#s-case .paper');p.classList.remove('shake');void p.offsetWidth;p.classList.add('shake');if(navigator.vibrate)navigator.vibrate([40,40,40]);toast(v==='x'?'Noch nicht ganz. Versuch es noch einmal.':'Das passt noch nicht. Schau dir das Rätsel noch einmal an.');return false}
  ctx.check=check;
- typeText($('#c-story'),D.s);
+ typeText($('#c-story'),D.s);witRow(d);
  try{(window.WIDGETS[D.w.k]||function(){})(ctx)}catch(e){console.error(e)}
  if(D.a&&!ctx.noInput){const inp=el('input');inp.placeholder='Lösung';inp.autocomplete='off';inp.setAttribute('autocapitalize','characters');inp.setAttribute('autocorrect','off');inp.spellcheck=false;
   const b=el('button','btn','Prüfen');b.onclick=()=>check(inp.value);inp.onkeydown=e=>{if(e.key==='Enter')check(inp.value)};A.append(inp,b);ctx.input=inp}
@@ -218,13 +229,14 @@ function openCase(d){curDay=d;const D=DAYS[d-1];show('#s-case');placePip(d);setT
  if(st.done[d])showSolved(false);
  function showSolved(fresh){const L=D.L;sv.innerHTML='<span class="stamp2">Gelöst</span>Dein Stern leuchtet mit dem Buchstaben<b class="big">'+L+'</b><span style="font-size:16px">'+D.how+'. Er steht jetzt an deinem Sternenhimmel. An Heiligabend verbindest du alle Sterne.</span>';sv.style.display='block';
   if(fresh){st.done[d]=1;save();SFX.ok();const fl=el('div','flystar',IC.star+' '+L);document.body.appendChild(fl);setTimeout(()=>fl.remove(),1800);sparkleAt(sv,16);if(navigator.vibrate)navigator.vibrate([20,60,20]);setTimeout(()=>sv.scrollIntoView({behavior:'smooth',block:'center'}),400)}
+  const rOk=d!==24||Object.keys(st.done).length===24;if(rOk){const gb=el('button','grim','<img src="z/o_eule_fenna.webp" alt=""><span>Fenna</span>'+IC.sound);gb.onclick=()=>sayBtn('v/r'+d+'.mp3',gb);sv.appendChild(gb);if(fresh&&st.sound&&st.voice!==false)setTimeout(()=>{if(curDay===d&&$('#s-case').classList.contains('on')&&!gb.classList.contains('on'))sayBtn('v/r'+d+'.mp3',gb)},1500)}
   if(d===24&&Object.keys(st.done).length===24){const fb=el('button','btn','Zur Sternennacht');fb.style.marginTop='14px';fb.onclick=finale;sv.appendChild(el('br'));sv.appendChild(fb)}
   else if(d===24){const n=24-Object.keys(st.done).length;sv.appendChild(el('p','','Dir fehlen noch '+n+' Sterne. Löse zuerst alle Rätsel, dann beginnt die Sternennacht.'))}}}
-$('#btn-case-back').onclick=()=>{hush();SFX.paper();const d=curDay;renderDesk(st.done[d]&&!st.seen?.[d]?d:0);st.seen=st.seen||{};if(st.done[d])st.seen[d]=1;save();show('#s-desk');if(st.done[d])setTimeout(()=>bell(1568,1.5,.08),500)};
+$('#btn-case-back').onclick=()=>{hush();placeAmb(null);SFX.paper();const d=curDay;renderDesk(st.done[d]&&!st.seen?.[d]?d:0);st.seen=st.seen||{};if(st.done[d])st.seen[d]=1;save();show('#s-desk');if(st.done[d])setTimeout(()=>bell(1568,1.5,.08),500)};
 
 /* ---------- Finale: Sterne verbinden ---------- */
 const FP=hexPts(200,168,128);let finRun=0;
-async function finale(){const run=++finRun;hush();show('#s-final');storm(1);['#verdict','#cert-wrap','#secret-wrap'].forEach(x=>$(x).classList.remove('on'));
+async function finale(){const run=++finRun;hush();placeAmb(null);show('#s-final');storm(1);['#verdict','#cert-wrap','#secret-wrap'].forEach(x=>$(x).classList.remove('on'));
  const F=$('#formula');F.className='formula';F.innerHTML='';let i=0;WORDS.forEach(w=>{const g=el('div','word');for(let k=0;k<w;k++){const s=el('div','slot');s.dataset.i=i++;g.appendChild(s)}F.appendChild(g)});const slots=[...F.querySelectorAll('.slot')];
  let s='<svg viewBox="0 0 400 400" id="fsvg">'+glow('sg3')+'<defs><radialGradient id="big"><stop offset="0" stop-color="#fffbe8"/><stop offset=".25" stop-color="#ffe08a" stop-opacity=".95"/><stop offset=".6" stop-color="#ffb92e" stop-opacity=".35"/><stop offset="1" stop-color="#ffb92e" stop-opacity="0"/></radialGradient></defs>'+'<image href="z/t_himmel.jpg" x="0" y="0" width="400" height="400" preserveAspectRatio="xMidYMax slice"/><rect id="fdim" width="400" height="400" fill="#0b1230" opacity=".45"/>'+bgStars(40,400,260,9)+
   '<g id="fblaze" opacity="0" style="transform-origin:200px 168px"><circle cx="200" cy="168" r="200" fill="url(#big)"/></g><g id="flines"></g><path id="fpoly" fill="none" stroke="#fff3c4" stroke-width="3" opacity="0"/><g id="fstars">';

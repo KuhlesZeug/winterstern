@@ -636,3 +636,18 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 /* v11: Zahlenquadrat, alle Zahlen auf der Teppichfläche statt auf dem Rand */
 .kz-pix{background-size:100% 100%;padding:20% 14.5%;max-width:340px;box-sizing:border-box}
 .kz-pix button{background:rgba(20,30,70,.7)}
+/* Figuren und Fenna */
+.wits{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px;align-items:center}
+.wits .wlab{width:100%;text-align:left;text-transform:none;letter-spacing:0;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:16px;color:#5b4a7a}
+.wchip,.grim{display:inline-flex;align-items:center;gap:8px;background:rgba(255,250,238,.75);border:1.5px solid rgba(43,35,64,.3);border-radius:999px;padding:4px 14px 4px 4px;color:var(--ink);font:600 17px 'Cormorant Garamond',Georgia,serif;box-shadow:0 2px 8px rgba(20,15,40,.15);transition:transform .15s,background .2s}
+.wchip:active,.grim:active{transform:scale(.96)}
+.wpor{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff6df,#e6d6b2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;border:1px solid rgba(184,137,58,.6)}
+.wpor img{width:82%;height:82%;object-fit:contain}
+.wchip .wsp .ic,.grim .ic{width:16px;height:16px;color:var(--gold2)}
+.wchip.on,.grim.on{background:#fbecc4;border-color:var(--gold2)}
+.wchip.on .wsp .ic,.grim.on .ic{animation:wpulse .8s ease-in-out infinite}
+@keyframes wpulse{50%{transform:scale(1.25)}}
+.solved .grim{display:flex;width:fit-content;margin:14px auto 0;background:rgba(255,255,255,.08);border-color:rgba(224,185,97,.6);color:#f6e8c4}
+.solved .grim .ic{color:var(--gold)}
+.solved .grim.on{background:rgba(224,185,97,.22)}
+.grim img{width:36px;height:36px;border-radius:50%;object-fit:contain;background:radial-gradient(circle at 50% 40%,#fff6df,#e6d6b2);border:1px solid rgba(184,137,58,.6);padding:2px}
