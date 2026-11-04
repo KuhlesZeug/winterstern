@@ -24,7 +24,7 @@ async function access(){await ready;if(st.act)return true;const v=kzNormCode($('
 let TOFF=0;
 (async()=>{try{const r=await fetch(location.pathname+'?t='+Date.now(),{method:'HEAD',cache:'no-store'});const d=Date.parse(r.headers.get('date'));if(d){TOFF=d-Date.now();if($('#s-desk').classList.contains('on'))renderDesk()}}catch(e){}})();
 function berlin(){const p=new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',year:'numeric',month:'numeric',day:'numeric'}).formatToParts(new Date(Date.now()+TOFF));const o={};p.forEach(x=>o[x.type]=+x.value);return o}
-let PROBE=false;(async()=>{const q=params.get('probe');if(q&&await kzSha(q)==='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){PROBE=true;window.__kz={openCase:d=>openCase(d)};if($('#s-desk').classList.contains('on'))renderDesk()}})();
+let PROBE=false;(async()=>{const q=params.get('probe');if(q&&await kzSha(q)==='f4c4125bb77f6326d8e44b3769bda526842e4f0ec9f36aeb3c9c12bd830806d9'){PROBE=true;window.__kz={openCase:d=>openCase(d),openEnv:d=>openEnv(d),runeDone:()=>runeDone()};if($('#s-desk').classList.contains('on'))renderDesk()}})();
 function unlocked(d){if(PROBE)return true;const b=berlin();if(b.month===12)return b.day>=d;if(b.month===1)return true;return false}
 function todayNr(){const b=berlin();return b.month===12&&b.day<=24?b.day:0}
 const ORD=['Erster','Zweiter','Dritter','Vierter','Fünfter','Sechster','Siebter','Achter','Neunter','Zehnter','Elfter','Zwölfter','Dreizehnter','Vierzehnter','Fünfzehnter','Sechzehnter','Siebzehnter','Achtzehnter','Neunzehnter','Zwanzigster','Einundzwanzigster','Zweiundzwanzigster','Dreiundzwanzigster','Vierundzwanzigster'];
@@ -49,6 +49,14 @@ const SFX={
  whoosh(){const c=ac();const r=noise(.8,500,1.5,.3);r.bf.frequency.exponentialRampToValueAtTime(3000,c.currentTime+.7)},
  chime(){[0,.35,.7,1.05].forEach((t,i)=>bell([1047,1319,1568,2093][i],2,.1,t))}
 };
+// Echte Geräusche (ElevenLabs), synthetische Töne bleiben als Rückfall
+const SBUF={};const SNAMES=['book','bubble','candle','click','crystal','globe','hoot','lantern','lock','paper','plop','quill','seal','stone','success','twinkle','wand','wing','wrong'];
+function sload(){const c=ac();SNAMES.forEach(n=>{if(SBUF[n]!==undefined)return;SBUF[n]=null;fetch('s/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>c.decodeAudioData(b)).then(d=>{SBUF[n]=d}).catch(()=>{})})}
+function smp(n,v,rate){const c=ac();if(!SBUF[n]){sload();return false}const s=c.createBufferSource();s.buffer=SBUF[n];if(rate)s.playbackRate.value=rate;const g=c.createGain();g.gain.value=v||.8;s.connect(g);g.connect(master);s.start();return true}
+(()=>{const o={...SFX};const M={paper:['paper',.9],magic:['success',.75],ok:['success',.9],no:['wrong',.7],wing:['wing',.8],seal:['seal',.9],bubble:['plop',.8],tick:['click',.6],whoosh:['wand',.8],chime:['twinkle',.7]};
+ Object.keys(M).forEach(k=>{SFX[k]=function(){const [n,v]=M[k];if(!smp(n,v,k==='tick'?1+Math.random()*.15:0))o[k]&&o[k]()}});
+ ['crystal','stone','globe','candle','lock','hoot','lantern','book','quill','twinkle','plop','wand','success'].forEach(n=>{SFX[n]=(v)=>smp(n,v||.8)})})();
+document.addEventListener('pointerdown',()=>{try{sload()}catch(e){}},{once:true});
 // Wind im Hintergrund
 let windG=null;
 function startWind(){if(windG)return;const c=ac();const n=c.sampleRate*4,b=c.createBuffer(1,n,c.sampleRate),x=b.getChannelData(0);let l=0;for(let i=0;i<n;i++){l=l*.996+(Math.random()*2-1)*.03;x[i]=l}
@@ -152,15 +160,15 @@ function renderDesk(newD){renderSky(newD);const g=$('#grid');g.innerHTML='';cons
 const RUNES=[[[65,10],[35,40],[65,60],[35,90]],[[66,14],[34,50],[66,86]],[[36,90],[36,12],[68,30],[36,48],[68,64]],[[50,10],[80,50],[50,90],[20,50],[50,10]],[[36,90],[36,10],[66,26],[36,46],[68,90]],[[30,90],[30,10],[70,35],[70,90]],[[50,92],[50,10],[22,38]],[[20,16],[80,84],[80,16],[20,84],[20,16]],[[40,90],[40,10],[70,34]],[[50,8],[76,90],[8,38],[92,38],[24,90],[50,8]]];
 let curDay=0,trace=null;
 function openEnv(d){curDay=d;const L=$('#letter'),O=$('#owl');L.className='letter';O.className='owl';void L.offsetWidth;
- $('#env-date').textContent=d==='secret'?'Persönlich für '+(gift&&gift.an||'dich'):d+'. Dezember';$('#lt-card').textContent=d==='secret'?'Persönlich':'Eulenbrief';
- $('#env-hint').textContent='Die Eule bringt deinen Brief …';$('#env-hint').style.visibility='visible';show('#s-env');
+ $('#env-date').textContent=d==='secret'?'Persönlich für '+(gift&&gift.an||'dich'):d+'. Dezember';$('#lt-card').innerHTML='<i class="lc-orn"></i><small>Akademie zu Rabenfels</small><b>'+(d==='secret'?'Persönlich':'Eulenbrief')+'</b><em>'+(d==='secret'?'nur für dich':'Nr. '+d+' · '+d+'. Dezember')+'</em><span>An meine lieben Lehrlinge</span><i class="lc-orn lc-b"></i>';
+ $('#env-hint').textContent='Die Eule bringt deinen Brief …';$('#env-hint').style.visibility='visible';show('#s-env');if(st.sound)smp('wind',.45);
  O.style.transform='';O.classList.add('fly');L.classList.add('in');SFX.wing();setTimeout(()=>{if(curDay!==d)return;O.classList.remove('fly');O.style.transform='none';O.classList.add('rest')},1650);setTimeout(()=>{if(curDay!==d)return;O.classList.remove('rest');O.classList.add('away');SFX.wing()},3300);
  const pts=d==='secret'?RUNES[9]:RUNES[(d-1)%9];buildRune(pts);setTimeout(()=>{if(curDay===d)$('#env-hint').textContent='Fahr mit dem Finger die leuchtende Rune auf dem Siegel nach'},1800)}
 function buildRune(pts){const R=$('#rune');R.className='rune';
  const samp=[];for(let i=0;i<pts.length-1;i++){const [x1,y1]=pts[i],[x2,y2]=pts[i+1],len=Math.hypot(x2-x1,y2-y1),n=Math.max(1,Math.round(len/3));for(let k=0;k<n;k++)samp.push([x1+(x2-x1)*k/n,y1+(y2-y1)*k/n])}samp.push(pts[pts.length-1]);
  const d='M'+pts.map(p=>p.join(' ')).join(' L');
  R.innerHTML='<svg viewBox="-10 -10 120 120"><defs><radialGradient id="wx2" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#4c6cc2"/><stop offset="1" stop-color="#121c48"/></radialGradient><filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+
- '<path d="M50 -6 C78 -8 104 18 106 46 C108 78 84 106 52 106 C18 108 -6 82 -6 50 C-8 20 20 -4 50 -6Z" fill="url(#wx2)" stroke="#0b1236" stroke-width="2"/><circle cx="50" cy="50" r="47" fill="none" stroke="#e0b961" stroke-width="1.2" opacity=".55"/>'+
+ '<image href="z/siegel_blau.webp" x="-14" y="-14" width="128" height="128"/>'+
  '<path d="'+d+'" fill="none" stroke="#e0b961" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".28"/>'+
  '<path id="rprog" d="'+d+'" fill="none" stroke="#fff3c4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#gl)"/>'+
  '<circle id="rdot" r="7" fill="#fff3c4" filter="url(#gl)"><animate attributeName="r" values="5;9;5" dur="1.2s" repeatCount="indefinite"/></circle></svg>';
@@ -175,7 +183,7 @@ function buildRune(pts){const R=$('#rune');R.className='rune';
  sv.addEventListener('pointerdown',dn);sv.addEventListener('pointermove',mv);addEventListener('pointerup',up);sv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false})}
 function runeDone(){if(!trace||trace.done)return;trace.done=true;const R=$('#rune'),L=$('#letter');$('#env-hint').style.visibility='hidden';SFX.magic();if(navigator.vibrate)navigator.vibrate([20,40,60]);sparkleAt(R,22);
  setTimeout(()=>{SFX.seal();R.classList.add('broken')},500);setTimeout(()=>{SFX.paper();L.classList.add('opened')},1300);
- setTimeout(()=>{if(curDay==='secret'){showSecret();return}st.open[curDay]=1;save();openCase(curDay)},2700)}
+ setTimeout(()=>{if(curDay==='secret'){showSecret();return}st.open[curDay]=1;save();openCase(curDay)},3900)}
 $('#btn-env-back').onclick=()=>{if(curDay==='secret'){show('#s-final');return}renderDesk();show('#s-desk')};
 
 /* ---------- Rätselseite ---------- */
