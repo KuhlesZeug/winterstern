@@ -629,3 +629,10 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 /* v10: Pip verschwindet beim Finden */
 .pip.gone{animation:pipgone .65s ease-in forwards}
 @keyframes pipgone{0%{transform:scale(1)}30%{transform:translateY(-12px) scale(1.25) rotate(-8deg);opacity:1}100%{transform:translateY(-60px) scale(.2) rotate(25deg);opacity:0}}
+/* v11: Kräuterbeet, Namen in allen Reihen lesbar */
+.kz-sudo button{padding:3px 1px 4px;overflow:visible;justify-content:center}
+.kz-sudo button img{width:60%;flex:none}
+.kz-sudo button small{font-size:11.5px;line-height:1.05;margin-top:1px;text-shadow:0 1px 2px rgba(0,0,0,.8);white-space:nowrap}
+/* v11: Zahlenquadrat, alle Zahlen auf der Teppichfläche statt auf dem Rand */
+.kz-pix{background-size:100% 100%;padding:20% 14.5%;max-width:340px;box-sizing:border-box}
+.kz-pix button{background:rgba(20,30,70,.7)}
