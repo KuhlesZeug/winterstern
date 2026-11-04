@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="de">
+<head><meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Der Winterstern von Rabenfels</title>
+<meta name="theme-color" content="#060a1e">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<canvas id="snow"></canvas>
+
+<section id="s-start" class="screen on">
+  <div class="start-sky" id="start-sky"></div>
+  <div class="start-in">
+    <div class="kick">Akademie zu Rabenfels · Ein Adventsrätsel</div>
+    <h1>Der Winterstern<em>von Rabenfels</em></h1>
+    <div class="start-owl"><img src="eule.png" alt="Schneeeule mit Eulenpost"></div>
+    <p id="giftline" class="giftline"></p>
+    <div id="giftmsg" class="giftmsg"></div>
+    <div id="codebox" class="codebox">
+      <p>Bitte gib den Zugangscode aus deinem PDF ein.</p>
+      <input id="code" autocomplete="off" autocapitalize="characters" placeholder="Zugangscode">
+      <p class="small"><a href="verschenken.html">Du möchtest den Kalender verschenken? Hier entlang.</a></p>
+    </div>
+    <button id="btn-start" class="btn big">Eulenpost öffnen</button>
+    <p class="small">Mit Ton spielen. Kopfhörer machen es noch zauberhafter.</p>
+    <div class="start-spacer"></div>
+  </div>
+</section>
+
+<section id="s-intro" class="screen">
+  <video id="ivid" class="ivid" playsinline muted preload="auto" poster="intro_poster.jpg" src="intro.mp4"></video><div class="ivig"></div>
+  <div class="intro-text" id="intro-text"></div>
+  <button id="btn-skip" class="btn ghost sm skip">Weiter</button>
+</section>
+
+<section id="s-desk" class="screen">
+  <header class="deskhead">
+    <div><div class="kick">Akademie zu Rabenfels</div><div class="title">Der Winterstern</div></div>
+    <div class="headbtns"><button id="btn-book" class="icon" title="Zauberbuch"></button><button id="btn-sound" class="icon" title="Ton"></button></div>
+  </header>
+  <div class="skybox" id="skybox"></div>
+  <div class="skylab" id="skylab"></div>
+  <div class="grid" id="grid"></div>
+  <p class="foot" id="deskfoot"></p>
+</section>
+
+<section id="s-env" class="screen">
+  <div class="env-wrap">
+    <div class="env-date" id="env-date"></div>
+    <div class="owl" id="owl"><img src="eule.png" alt="Schneeeule mit Brief"></div>
+    <div class="letter" id="letter">
+      <div class="lt-back"></div>
+      <div class="lt-card" id="lt-card">Eulenbrief</div>
+      <div class="lt-front"></div>
+      <div class="lt-flap"></div>
+      <div class="rune" id="rune"></div>
+    </div>
+    <p class="env-hint" id="env-hint">Fahr mit dem Finger die leuchtende Rune nach</p>
+    <button class="btn ghost sm" id="btn-env-back">Zurück zum Sternenhimmel</button>
+  </div>
+</section>
+
+<section id="s-case" class="screen">
+  <div class="case">
+    <div class="paper">
+      <div class="case-top"><span id="c-date"></span><span class="nr" id="c-nr"></span></div>
+      <div class="dept">Eulenbrief von Meisterin Eibenhain</div>
+      <div class="titlerow"><h2 id="c-title"></h2><button class="say" id="btn-say" title="Vorlesen"></button></div>
+      <p class="story" id="c-story"></p>
+      <div class="widget" id="c-widget"></div>
+      <p class="question" id="c-q"></p>
+      <div class="answer" id="c-answer"></div>
+      <div class="hints"><button class="btn ghost sm" id="btn-h1">Hinweis 1</button><button class="btn ghost sm" id="btn-h2">Hinweis 2</button></div>
+      <p class="hinttext" id="c-hint"></p>
+      <div class="solved" id="c-solved"></div>
+    </div>
+    <button class="btn ghost" id="btn-case-back">Zurück zum Sternenhimmel</button>
+  </div>
+</section>
+
+<section id="s-book" class="screen">
+  <div class="case"><div class="paper book-page">
+    <div class="kick" style="color:var(--gold2)">Akademie zu Rabenfels</div>
+    <h2>Das Zauberbuch</h2>
+    <p class="story">Über dem höchsten Turm der Akademie leuchtet seit tausend Wintern der Winterstern. In dieser Nacht ist er erloschen, und ein Schneesturm hat sich über die Burg gelegt. Meisterin Eibenhain schickt dir jeden Tag im Dezember einen Eulenbrief mit einem Rätsel. Jede Lösung entzündet einen Stern mit einem Buchstaben. An Heiligabend verbindest du alle Sterne, sprichst die Formel und entzündest den Winterstern neu.</p>
+    <h3>Zahlentafel</h3>
+    <div class="numtab" id="numtab"></div>
+    <h3>So funktioniert es</h3>
+    <p class="story">Jeden Tag im Dezember bringt die Eule einen neuen Brief. Verpasste Tage kannst du jederzeit nachholen, zukünftige Briefe bleiben versiegelt. Wenn du nicht weiterkommst, helfen dir zwei Hinweise. Dein Fortschritt bleibt auf diesem Handy gespeichert.</p>
+    <button class="btn" id="btn-book-back">Zurück</button>
+  </div></div>
+</section>
+
+<section id="s-final" class="screen">
+  <div class="fin-wrap">
+    <div class="fin-head"><div class="kick">Heiligabend · Die Sternennacht</div><h2>Der Winterstern</h2></div>
+    <p class="fin-hint" id="fin-hint"></p>
+    <div class="finsky" id="finsky"></div>
+    <div class="formula" id="formula"></div>
+    <div class="fin-help" id="fin-help"><button class="btn ghost sm" id="btn-auto">Sterne verbinden lassen</button></div>
+    <div id="verdict" class="paper verdict"></div>
+    <div id="cert-wrap" class="cert-wrap">
+      <div class="cert" id="cert"><div class="cert-in">
+        <div class="cert-kick">AKADEMIE ZU RABENFELS</div>
+        <div class="cert-title">Urkunde</div>
+        <div class="cert-sub">Hiermit wird</div>
+        <div class="cert-name" id="cert-name">Lehrling</div>
+        <div class="cert-sub">ernannt zum Titel</div>
+        <div class="cert-rank" id="cert-rank">Meister der Winterzauberei</div>
+        <div class="cert-text">In 24 Nächten wurden alle Rätsel gelöst, die alte Formel gefunden und der Winterstern von Rabenfels wieder entzündet.</div>
+        <div class="cert-foot"><div><span class="sig">Eibenhain</span><small>Meisterin Eibenhain</small></div><div class="cert-seal"><span class="cs-hint">Halten</span></div><div><span class="sig">24.12.</span><small>Rabenfels</small></div></div>
+      </div></div>
+      <p class="cert-tap"></p>
+      <div class="rankpick" id="rankpick"><button class="btn ghost sm" data-r="Meisterin der Winterzauberei">Meisterin</button><button class="btn ghost sm" data-r="Meister der Winterzauberei">Meister</button></div>
+      <div class="cert-name-edit" id="cert-edit"><input id="cert-input" maxlength="32" placeholder="Dein Name für die Urkunde"><button class="btn sm" id="cert-set">Eintragen</button></div>
+      <div class="cert-btns"><button class="btn" id="cert-save">Urkunde speichern</button><button class="btn ghost" id="cert-share">Teilen</button></div>
+      <button class="btn ghost sm" id="final-back" style="margin-top:8px">Zurück zum Sternenhimmel</button>
+    </div>
+    <div id="secret-wrap" class="secret-wrap">
+      <div class="owlbig"><img src="eule.png" alt=""></div>
+      <p class="secret-q">Eine letzte Eule bringt dir einen Brief.</p>
+      <p class="secret-from" id="secret-from"></p>
+      <button class="btn" id="secret-open">Brief öffnen</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-secret" class="screen">
+  <div class="secret-page">
+    <div class="paper secret-letter" id="secret-letter">
+      <div class="kick" style="color:var(--gold2)">Heiligabend · Persönlich</div>
+      <h2 id="secret-to">Für dich</h2>
+      <p class="secret-text" id="secret-text"></p>
+      <p class="secret-sign" id="secret-sign"></p>
+    </div>
+    <button class="btn ghost" id="secret-back">Zurück zur Urkunde</button>
+  </div>
+</section>
+
+<div id="cert-modal" class="cert-modal" aria-hidden="true">
+  <div class="cm-box">
+    <img id="cert-big" alt="Urkunde Winterzauberei">
+    <div class="cm-btns"><button class="btn" id="cert-pdf">Als PDF speichern</button><button class="btn ghost" id="cert-close">Schließen</button></div>
+    <p class="cm-note">Das PDF ist im A4 Querformat und lässt sich direkt ausdrucken.</p>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<audio id="music" src="musik.mp3" loop preload="auto"></audio>
+<script src="icons.js?v=12"></script>
+<script src="gate.js"></script>
+<script src="data.js?v=12"></script>
+<script src="stimmen.js?v=12"></script>
+<script src="app.js?v=12"></script>
+<script src="widgets.js?v=12"></script>
+</body>
+</html>

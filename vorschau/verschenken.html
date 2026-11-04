@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#060a1e">
+<title>Winterstern verschenken</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+body{overflow:auto}
+.wrap{max-width:520px;margin:0 auto;padding:24px 14px 50px}
+label{display:block;font-weight:600;margin:14px 0 4px}
+.f{width:100%;font:18px 'Cormorant Garamond',serif;padding:11px 12px;border:1px solid rgba(43,35,64,.45);border-radius:10px;background:#fffaf0;color:var(--ink)}
+textarea.f{min-height:96px;resize:vertical}
+#out{display:none;margin-top:18px}
+.linkbox{word-break:break-all;font-family:Cinzel,serif;font-size:13px;background:#fffaf0;border:1px dashed var(--ink);padding:10px;border-radius:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.wa{background:#25D366;color:#fff}
+@media (max-width:480px){.wrap{padding-left:0;padding-right:0}.wrap>.paper{border-radius:0}.wrap>.kick,.wrap>h1{padding:0 14px}}
+</style>
+</head>
+<body style="background:radial-gradient(ellipse at 50% 0%,#26346b,#060a1e 70%)">
+<div class="wrap">
+  <div class="kick" style="text-align:center">KuhlesZeug · Zauber Adventskalender</div>
+  <h1 style="text-align:center;font-size:28px">Den Winterstern<em>verschenken</em></h1>
+  <div class="paper">
+    <p class="story">So einfach geht es: Code aus deinem PDF eingeben, Namen und einen Gruß eintragen, Link erstellen und per WhatsApp verschicken. Ab dem 1. Dezember bringt die Eule dem Beschenkten jeden Tag einen neuen Brief mit einem Rätsel.</p>
+    <label for="code">Zugangscode aus deinem PDF</label>
+    <input class="f" id="code" autocomplete="off" autocapitalize="characters" placeholder="z. B. ABC123" style="text-transform:uppercase">
+    <label for="an">Für wen ist der Kalender?</label>
+    <input class="f" id="an" maxlength="40" placeholder="Vorname">
+    <label for="von">Von wem?</label>
+    <input class="f" id="von" maxlength="40" placeholder="Dein Name">
+    <label for="m">Dein Gruß (erscheint auf der ersten Seite)</label>
+    <textarea class="f" id="m" maxlength="280" placeholder="Damit dir im Advent nicht langweilig wird …"></textarea>
+    <label for="s">Geheime Botschaft für Heiligabend (freiwillig)</label>
+    <p class="small" style="color:var(--ink);margin:0 0 6px">Bleibt den ganzen Dezember versiegelt. Erst wenn der Winterstern wieder leuchtet, bringt eine letzte Eule diesen Brief von dir.</p>
+    <textarea class="f" id="s" maxlength="400" placeholder="Frohe Weihnachten! Heute Abend wartet noch eine Überraschung auf dich …"></textarea>
+    <div class="row"><button class="btn" id="make">Geschenklink erstellen</button></div>
+    <div id="out">
+      <p class="question">Dein persönlicher Geschenklink:</p>
+      <div class="linkbox" id="link"></div>
+      <div class="row">
+        <a class="btn wa" id="wa" target="_blank" rel="noopener">Per WhatsApp schicken</a>
+        <button class="btn ghost" id="copy" style="color:var(--ink);border-color:rgba(43,35,64,.45)">Link kopieren</button>
+        <a class="btn ghost" id="test" target="_blank" style="color:var(--ink);border-color:rgba(43,35,64,.45)">Vorschau</a>
+      </div>
+      <p class="small" style="color:var(--ink)">Tipp: Schick den Link am besten am 30. November, dann wartet am nächsten Morgen der erste Eulenbrief.</p>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+<script src="gate.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2600)}
+$('#make').onclick=async()=>{const c=kzNormCode($('#code').value);if(!c||await kzSha(c)!==KZ_H){toast('Der Code stimmt nicht. Er steht in deinem PDF.');return}
+ const an=$('#an').value.trim(),von=$('#von').value.trim(),m=$('#m').value.trim(),s=$('#s').value.trim();if(!an){toast('Bitte trag ein, für wen der Kalender ist.');return}
+ const k=await kzSig(an,von,kzMsg(m,s));const o={an,von,m,k};if(s)o.s=kzHide(s);const url=new URL('./',location.href).href+'?g='+kzEnc(o);
+ $('#link').textContent=url;$('#out').style.display='block';$('#test').href=url;
+ const txt='Eulenpost für dich, '+an+'! Im Dezember bringt dir jeden Tag eine Eule ein magisches Rätsel aus der Akademie zu Rabenfels. Am Ende entzündest du den Winterstern. Am besten mit Ton: '+url;
+ $('#wa').href='https://wa.me/?text='+encodeURIComponent(txt);$('#out').scrollIntoView({behavior:'smooth'})};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText($('#link').textContent);toast('Link kopiert')}catch(e){toast('Bitte den Link markieren und kopieren')}};
+</script>
+</body>
+</html>
