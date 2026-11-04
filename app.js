@@ -7,6 +7,7 @@ const KEY='kz_zauber_v1';
 if(params.get('reset')==='1'&&params.get('probe')){try{localStorage.removeItem(KEY)}catch(e){}history.replaceState(null,'',location.pathname+location.search.replace(/[?&]reset=1/,'').replace(/^&/,'?'))}
 let st={done:{},open:{},sound:true};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s)}catch(e){}
+if(st.sound===false&&!st.soundSet)st.sound=true;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -64,6 +65,13 @@ function startWind(){if(windG)return;const c=ac();const n=c.sampleRate*4,b=c.cre
  const lfo=c.createOscillator(),lg=c.createGain();lfo.frequency.value=.11;lg.gain.value=180;lfo.connect(lg);lg.connect(f.frequency);lfo.start();setWind(STORM)}
 function setWind(v){if(windG&&AC)windG.gain.setTargetAtTime(.035*v,AC.currentTime,1.2)}
 const music=$('#music');const MV=.2,MD=.06;let mG=null;
+/* iOS und Android: Ton auch bei Stummschalter, ohne extra Antippen */
+try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+let kzSil=null;function kzUnlock(){try{ac()}catch(e){}if(!kzSil){try{kzSil=new Audio('data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAGAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA');kzSil.loop=true;kzSil.setAttribute('x-webkit-airplay','deny');kzSil.play().catch(()=>{kzSil=null})}catch(e){kzSil=null}}}
+['touchstart','touchend','pointerdown','click','keydown'].forEach(ev=>document.addEventListener(ev,kzUnlock,{capture:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')AC.resume()});
+document.addEventListener('pointerdown',()=>{if(st.sound&&$('#s-desk').classList.contains('on')&&music.paused)setTimeout(musicOn,0)},{capture:true,passive:true});
+
 function musicOn(){if(!st.sound)return;const c=ac();if(!mG){try{const src=c.createMediaElementSource(music);mG=c.createGain();mG.gain.value=(voice&&!voice.paused)?MD:MV;src.connect(mG);mG.connect(master)}catch(e){music.volume=.15}}music.play().catch(()=>{})}
 function mVol(v){if(mG&&AC)mG.gain.setTargetAtTime(v,AC.currentTime,.3)}
 const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=null;
@@ -84,7 +92,7 @@ function storm(v){STORM=v;setWind(v)}
 
 /* ---------- Pip, das Eulenküken (Suchspiel) ---------- */
 const PIPPOS=[['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%'],['peek','top:4px;right:72px'],['sleep','bottom:8px;right:72px'],['read','bottom:10px;right:14px'],['star','bottom:8px;right:72px'],['wave','bottom:10px;right:14px'],['fly','top:4px;left:44%']];
-const PIPV=['v/pip1.mp3','v/pip2.mp3','v/pip3.mp3','v/pip4.mp3'];
+const PIPV=['v/eule1.mp3','v/eule2.mp3'];
 function pipCount(){return Object.keys(st.pip||{}).length}
 function placePip(d){const paper=$('#s-case .paper');let p=$('#pip');if(p)p.remove();const [pose,css]=PIPPOS[(d-1)%24];
  p=el('button','pip'+((st.pip||{})[d]?' found':''));p.id='pip';p.setAttribute('aria-label','Pip');p.style.cssText=css;p.innerHTML='<img src="ic/pip_'+pose+'.webp" alt="">';
@@ -134,7 +142,7 @@ async function beginIntro(){const run=++introRun;SFX.magic();show('#s-intro');st
  if(run===introRun)goDesk()}
 $('#btn-skip').onclick=goDesk;
 function goDesk(){introRun++;hush();try{$('#ivid').pause()}catch(e){}storm(1);startWind();renderDesk();show('#s-desk');musicOn()}
-$('#btn-sound').onclick=()=>{ac();setSound(!st.sound);musicOn()};
+$('#btn-sound').onclick=()=>{ac();st.soundSet=1;setSound(!st.sound);musicOn()};
 setSound(st.sound);
 $('#btn-book').onclick=()=>{SFX.paper();const n=$('#numtab');n.innerHTML='';'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach((c,i)=>n.appendChild(el('div','','<b>'+c+'</b><br>'+(i+1))));show('#s-book')};
 $('#btn-book-back').onclick=()=>{SFX.paper();show('#s-desk')};
