@@ -59,7 +59,7 @@ window.WIDGETS={
  wheel(ctx){const w=ctx.D.w,A='ABCDEFGHIJKLMNOPQRSTUVWXYZ';ctx.W.appendChild(lab('Geheime Botschaft'));ctx.W.appendChild(el('div','codeword kz-code',w.code.split('').map(c=>'<span>'+c+'</span>').join('')));
   const s=sv('svg',{viewBox:'-150 -150 300 300',class:'wheel kz-wheel'});
   s.appendChild(sv('image',{href:'z/o_runenscheibe.webp',x:-150,y:-150,width:300,height:300}));
-  for(let i=0;i<26;i++){const a=i/26*Math.PI*2;if(i===3)s.appendChild(sv('circle',{cx:Math.sin(a)*126,cy:-Math.cos(a)*126,r:12,fill:'#8a2a3a',stroke:'#f6d78a','stroke-width':1.5}));s.appendChild(sv('text',{x:Math.sin(a)*126,y:-Math.cos(a)*126+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':15,fill:i===3?'#fff':'#3a2306',style:'paint-order:stroke',stroke:i===3?'none':'rgba(255,240,200,.6)','stroke-width':2},A[i]))}
+  for(let i=0;i<26;i++){const a=i/26*Math.PI*2,cx=Math.sin(a)*126,cy=-Math.cos(a)*126;s.appendChild(sv('circle',{cx,cy:cy+1.2,r:12.2,fill:'rgba(40,22,4,.45)'}));s.appendChild(sv('circle',{cx,cy,r:12,fill:i===3?'#8a2a3a':'#f6e6bd',stroke:i===3?'#f6d78a':'#7a5520','stroke-width':1.3}));s.appendChild(sv('text',{x:cx,y:cy+5.3,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':15,fill:i===3?'#fff':'#2a1704'},A[i]))}
   const g=sv('g',{});g.appendChild(sv('circle',{r:106,fill:'#18275e',stroke:'#e0b961','stroke-width':3}));g.appendChild(sv('circle',{r:84,fill:'none',stroke:'#e0b961','stroke-width':1,opacity:.6}));
   for(let i=0;i<26;i++){const a=i/26*Math.PI*2;if(i===0)g.appendChild(sv('circle',{cx:0,cy:-95,r:11,fill:'none',stroke:'#ffd76a','stroke-width':2.5}));g.appendChild(sv('text',{x:Math.sin(a)*95,y:-Math.cos(a)*95+5,'text-anchor':'middle','font-family':'Cinzel','font-weight':700,'font-size':i===0?16:13,fill:i===0?'#ffd76a':'#f1d690'},A[i]))}
   for(let k=0;k<12;k++){const a=k/12*Math.PI*2;g.appendChild(sv('circle',{cx:Math.sin(a)*60,cy:-Math.cos(a)*60,r:1.6,fill:'#e0b961',opacity:.7}))}
@@ -135,11 +135,22 @@ window.WIDGETS={
   const owl=sv('image',{href:'z/o_eule_fenna.webp',width:34,height:42});s.appendChild(owl);
   let r=ctx.solved?0:5,c=ctx.solved?5:0;const pos=()=>{owl.setAttribute('x',c*C+8);owl.setAttribute('y',r*C+4)};pos();
   const D={n:[-1,0],s:[1,0],w:[0,-1],e:[0,1]};
-  const mv=d=>{if(!w.open[r][c].includes(d)){SFX.no();return}trail.appendChild(sv('circle',{cx:c*C+25,cy:r*C+25,r:4,fill:'#9a6f1e',opacity:.45}));r+=D[d][0];c+=D[d][1];SFX.wing();pos();if(r===0&&c===5){SFX.hoot(.6);setTimeout(()=>SFX.magic(),600);toast('Fenna ist am Turm! Welches Wort hat sie gesammelt?')}};
-  const ar=el('div','arrows');ar.innerHTML='<span></span><button data-m="n">'+IC.up+'</button><span></span><button data-m="w">'+IC.left+'</button><button data-m="s">'+IC.down+'</button><button data-m="e">'+IC.right+'</button>';ar.onclick=e=>{const m=e.target.dataset.m;if(m){ac();mv(m)}};
-  let sx=null,sy=null;box.addEventListener('pointerdown',e=>{ac();sx=e.clientX;sy=e.clientY});box.addEventListener('pointermove',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;const th=box.getBoundingClientRect().width/8;if(Math.abs(dx)>th||Math.abs(dy)>th){mv(Math.abs(dx)>Math.abs(dy)?(dx>0?'e':'w'):(dy>0?'s':'n'));sx=e.clientX;sy=e.clientY}});addEventListener('pointerup',()=>{sx=null});
-  const rs=btn('Zurück zum Start','ghost sm');rs.onclick=()=>{r=5;c=0;trail.innerHTML='';pos()};
-  ctx.W.append(box,ar,rs)},
+  const lc={};s.querySelectorAll('circle').forEach(ci=>{const k=Math.round((+ci.getAttribute('cy')-25)/C)+','+Math.round((+ci.getAttribute('cx')-25)/C);lc[k]=ci});
+  const got=el('div','kz-mgot');const path=[[r,c]];
+  const paint=()=>{trail.innerHTML='';for(let i=0;i<path.length-1;i++){const [a1,b1]=path[i],[a2,b2]=path[i+1];trail.appendChild(sv('line',{x1:b1*C+25,y1:a1*C+25,x2:b2*C+25,y2:a2*C+25,stroke:'#c9962e','stroke-width':6,'stroke-linecap':'round',opacity:.55}))}
+   const on=new Set(path.map(([a,b])=>a+','+b));Object.keys(lc).forEach(k=>{const ci=lc[k];const hit=on.has(k);ci.setAttribute('fill',hit?'#ffe27a':'#d7a840');ci.setAttribute('stroke',hit?'#7a2a10':'#8a6420');ci.setAttribute('stroke-width',hit?3:1.5);ci.setAttribute('r',hit?15:13)});
+   const L=path.map(([a,b])=>w.let[a][b]).filter(x=>x!=='.');got.innerHTML='<span>Gesammelt</span>'+(L.length?L.map(x=>'<b>'+x+'</b>').join(''):'<i>noch nichts</i>')};
+  const mv=d=>{if(!w.open[r][c].includes(d)){SFX.no();box.classList.remove('bump');void box.offsetWidth;box.classList.add('bump');return}r+=D[d][0];c+=D[d][1];
+   const pv=path[path.length-2];if(pv&&pv[0]===r&&pv[1]===c)path.pop();else path.push([r,c]);SFX.wing();pos();paint();
+   if(r===0&&c===5){SFX.hoot(.6);setTimeout(()=>SFX.magic(),600);toast('Fenna ist am Turm! Welches Wort hat sie gesammelt?')}};
+  const ar=el('div','arrows');ar.innerHTML='<span></span><button data-m="n" aria-label="hoch">'+IC.up+'</button><span></span><button data-m="w" aria-label="links">'+IC.left+'</button><button data-m="s" aria-label="runter">'+IC.down+'</button><button data-m="e" aria-label="rechts">'+IC.right+'</button>';
+  ar.querySelectorAll('button').forEach(b=>b.addEventListener('pointerdown',e=>{e.preventDefault();ac();b.classList.remove('hit');void b.offsetWidth;b.classList.add('hit');mv(b.dataset.m)}));
+  let sx=null,sy=null,sw=false;box.addEventListener('pointerdown',e=>{ac();sx=e.clientX;sy=e.clientY;sw=false});box.addEventListener('pointermove',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;const th=box.getBoundingClientRect().width/9;if(Math.abs(dx)>th||Math.abs(dy)>th){sw=true;mv(Math.abs(dx)>Math.abs(dy)?(dx>0?'e':'w'):(dy>0?'s':'n'));sx=e.clientX;sy=e.clientY}});
+  box.addEventListener('pointerup',e=>{if(sx!==null&&!sw){const [x,y]=svgPt(s,e);const tc=Math.floor(x/C),tr=Math.floor(y/C);const dr=tr-r,dc=tc-c;if(Math.abs(dr)+Math.abs(dc)===1)mv(dr<0?'n':dr>0?'s':dc<0?'w':'e');else if(!(dr===0&&dc===0))toast('Tipp auf ein Feld direkt neben Fenna.')}sx=null});addEventListener('pointerup',()=>{sx=null});
+  const rs=btn('Zurück zum Start','ghost sm');rs.onclick=()=>{r=5;c=0;path.length=0;path.push([r,c]);pos();paint()};
+  if(ctx.solved){path.length=0;[[5,0],[5,1],[5,2],[4,2],[4,1],[4,0],[3,0],[3,1],[3,2],[3,3],[3,4],[2,4],[2,5],[1,5],[1,4],[0,4],[0,5]].forEach(x=>path.push(x))}
+  paint();
+  ctx.W.append(box,got,ar,rs)},
  // 9 Spieluhr
  musicbox(ctx){const w=ctx.D.w,F={};w.bells.forEach(([L,f])=>F[L]=f);const mb=el('div','kz-mbox');
   mb.innerHTML='<img src="z/o_spieluhr.webp" alt="Spieluhr" class="box">';
@@ -154,7 +165,7 @@ window.WIDGETS={
   const play=btn(IC.right+' Melodie abspielen','ghost sm');play.onclick=()=>{ac();w.melody.split('').forEach((L,i)=>setTimeout(()=>{bell(F[L],1.5,.16);mb.classList.remove('play');void mb.offsetWidth;mb.classList.add('play')},i*600))};
   ctx.W.append(lab('Die sechs Glocken'),bs,play)},
  // 10 Schneekugel
- globe(ctx){const wrap=el('div','globewrap kz-globe');const s=el('img','gimg');s.src='z/o_schneekugel.webp';
+ globe(ctx){const wrap=el('div','globewrap kz-globe');const s=el('img','gimg');s.src='z/o_schneekugel.webp';s.draggable=false;wrap.style.touchAction='pan-y';
   const cv=el('canvas');cv.width=400;cv.height=400;cv.className='gcv';const tx=el('div','globetext',ctx.D.w.text);wrap.append(s,cv,tx);
   const meter=el('div','meter','<i></i>');ctx.W.append(wrap,meter,lab('Schütteln oder schnell hin und her wischen'));
   const x=cv.getContext('2d');const P=[];for(let i=0;i<140;i++)P.push({x:100+Math.random()*120-60,y:140+Math.random()*20,vx:0,vy:0});let E=ctx.solved?.6:0,alive=true;
@@ -163,9 +174,13 @@ window.WIDGETS={
    E=Math.max(0,E-.004);tx.style.opacity=Math.max(0,Math.min(1,(E-.25)*3));meter.firstChild.style.width=Math.min(100,E*100)+'%';requestAnimationFrame(loop)})();
   let lastS=0;const kick=a=>{E=Math.min(1,E+a);const t=performance.now();if(t-lastS>900){lastS=t;SFX.globe(.6)}};
   let lx=null,dir=0;wrap.addEventListener('pointerdown',e=>{ac();lx=e.clientX});wrap.addEventListener('pointermove',e=>{if(lx===null)return;const d=e.clientX-lx;if(Math.abs(d)>8){const nd=Math.sign(d);if(nd!==dir&&dir)kick(.14);dir=nd;lx=e.clientX}});addEventListener('pointerup',()=>{lx=null;dir=0});
-  const mo=e=>{if(!document.body.contains(cv)){removeEventListener('devicemotion',mo);return}const a=e.accelerationIncludingGravity||e.acceleration;if(!a)return;const m=Math.hypot(a.x||0,a.y||0,a.z||0);if(m>16)kick((m-16)/40)};
-  const sh=btn(IC.phone+' Schütteln erlauben','ghost sm');sh.onclick=async()=>{try{if(window.DeviceMotionEvent&&DeviceMotionEvent.requestPermission)await DeviceMotionEvent.requestPermission()}catch(e){}addEventListener('devicemotion',mo);sh.textContent='Jetzt schütteln!'};
-  if(window.DeviceMotionEvent&&!DeviceMotionEvent.requestPermission)addEventListener('devicemotion',mo);ctx.W.appendChild(sh)},
+  let lg=null;const mo=e=>{if(!document.body.contains(cv)){removeEventListener('devicemotion',mo);return}const a=e.acceleration,g=e.accelerationIncludingGravity;let m=0;
+   if(a&&a.x!=null)m=Math.hypot(a.x||0,a.y||0,a.z||0);else if(g&&g.x!=null){if(lg)m=Math.hypot(g.x-lg.x,g.y-lg.y,g.z-lg.z)*1.4;lg={x:g.x,y:g.y,z:g.z}}
+   if(m>5)kick(Math.min(.12,(m-5)/45))};
+  let mOn=false,asked=false;const sh=btn(IC.phone+' Schütteln einschalten','ghost sm');
+  const allow=async()=>{if(mOn)return;try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function'){const r=await DeviceMotionEvent.requestPermission();if(r!=='granted'){if(!asked)toast('Ohne Erlaubnis geht nur das Wischen über die Kugel.');asked=true;return}}}catch(e){}mOn=true;addEventListener('devicemotion',mo);sh.innerHTML=IC.phone+' Jetzt kräftig schütteln!'};
+  sh.onclick=allow;wrap.addEventListener('pointerdown',()=>{if(!asked&&window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function')allow()});
+  if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission!=='function'){mOn=true;addEventListener('devicemotion',mo);sh.innerHTML=IC.phone+' Schüttle dein Handy'}ctx.W.appendChild(sh)},
  // 11 Kräuter Sudoku
  sudoku(ctx){const w=ctx.D.w,g=el('div','sudo kz-sudo'),cur=w.giv.map(r=>r.slice());if(ctx.solved)w.sol.forEach((r,i)=>cur[i]=r.slice());let won=ctx.solved;
   const HI={Minze:'z/o_k_minze.webp',Salbei:'z/o_k_salbei.webp',Thymian:'z/o_k_thymian.webp',Nessel:'z/o_k_nessel.webp'};const paint=(b,v)=>{b.innerHTML=v?'<img src="'+HI[w.herbs[v-1][0]]+'" alt=""><small>'+w.herbs[v-1][0]+'</small>':''};
@@ -217,11 +232,19 @@ window.WIDGETS={
  // 15 Schloss
  lock(ctx){const w=ctx.D.w;const cl=el('div','clues');w.clues.forEach(([c,t])=>cl.appendChild(el('div','','<b>'+c+'</b><span>'+t+'</span>')));
   const v=ctx.solved?w.code.split('').map(Number):[0,0,0];const lw=el('div','lockw kz-lockw');const chest=el('div','kz-chest'+(ctx.solved?' open':''),'<img src="z/o_truhe.webp" alt=""><img src="z/o_schluessel4.webp" class="k" alt=""><b>T</b>');
-  v.forEach((x,i)=>{const r=el('div','ring');const u=el('button','',IC.up),b=el('b','',x),d=el('button','',IC.down);const set=k=>{v[i]=(v[i]+k+10)%10;b.textContent=v[i];SFX.tick();b.classList.remove('roll');void b.offsetWidth;b.classList.add('roll')};u.onclick=()=>set(1);d.onclick=()=>set(-1);
+  const dr=el('div','kz-drums');const dk=[];[0,1,2].forEach(i=>{const d=el('span','kz-drum');dr.appendChild(d);dk.push(d)});chest.appendChild(dr);
+  const showD=()=>dk.forEach((d,i)=>{d.innerHTML='<i>'+((v[i]+9)%10)+'</i><b>'+v[i]+'</b><i>'+((v[i]+1)%10)+'</i>'});showD();
+  v.forEach((x,i)=>{const r=el('div','ring');const u=el('button','',IC.up),b=el('b','',x),d=el('button','',IC.down);const set=k=>{v[i]=(v[i]+k+10)%10;b.textContent=v[i];showD();SFX.tick();b.classList.remove('roll');void b.offsetWidth;b.classList.add('roll');dk[i].classList.remove('roll');void dk[i].offsetWidth;dk[i].classList.add('roll')};
+   [[u,1],[d,-1]].forEach(([bt,k])=>{bt.addEventListener('pointerdown',e=>{e.preventDefault();ac();bt.classList.remove('hit');void bt.offsetWidth;bt.classList.add('hit');set(k)});bt.addEventListener('click',e=>e.preventDefault())});
    let sy=null;b.addEventListener('pointerdown',e=>{sy=e.clientY});b.addEventListener('pointermove',e=>{if(sy===null)return;if(Math.abs(e.clientY-sy)>18){set(e.clientY<sy?1:-1);sy=e.clientY}});addEventListener('pointerup',()=>sy=null);b.style.touchAction='none';
    r.append(u,b,d);lw.appendChild(r)});
-  const go=btn('Kästchen öffnen','');go.onclick=()=>{if(v.join('')===w.code){SFX.lock();chest.classList.add('open');setTimeout(()=>{SFX.magic();sparkleAt(chest,22)},700);setTimeout(()=>ctx.check('__OK__'),1500)}else{SFX.click&&SFX.tick();chest.classList.remove('rattle');void chest.offsetWidth;chest.classList.add('rattle');ctx.check('x')}};
-  ctx.noInput=true;ctx.W.append(cl,chest,lw,go)},
+  const tries=el('div','clues kz-tries');const fb=g=>{const c=w.code;let rp=0,wp=0;for(let i=0;i<3;i++){if(g[i]===c[i])rp++;else if(c.includes(g[i]))wp++}
+   const z=n=>n===1?'Eine Ziffer':n===2?'Zwei Ziffern':'Drei Ziffern';if(!rp&&!wp)return 'Keine Ziffer stimmt.';const t=[];if(rp)t.push(z(rp)+(rp===1?' stimmt und steht':' stimmen und stehen')+' am richtigen Platz');if(wp)t.push((rp?(wp===1?'eine':wp===2?'zwei':'drei'):z(wp))+(wp===1?' stimmt, steht aber':' stimmen, stehen aber')+' am falschen Platz');return t.join(', ')+'.'};
+  const go=btn('Kästchen öffnen','');go.onclick=()=>{const g=v.join('');if(g===w.code){SFX.lock();chest.classList.add('open');setTimeout(()=>{SFX.magic();sparkleAt(chest,22)},700);setTimeout(()=>ctx.check('__OK__'),1500)}else{SFX.tick();chest.classList.remove('rattle');void chest.offsetWidth;chest.classList.add('rattle');
+   if(!tries.childElementCount)tries.appendChild(el('div','kz-trylab','Deine Versuche, das Schloss antwortet:'));const row=el('div','new','<b>'+g+'</b><span>'+fb(g)+'</span>');tries.appendChild(row);
+   if(navigator.vibrate)navigator.vibrate([40,40,40]);toast('Das Schloss klemmt. Schau, was es dir verrät.')}};
+  const rule=el('div','kz-rule','Im Code kommt jede Ziffer nur einmal vor.');
+  ctx.noInput=true;ctx.W.append(cl,rule,chest,lw,go,tries)},
  // 16 Bücher
  books(ctx){const w=ctx.D.w,sh=el('div','shelf kz-shelf2');let arr=ctx.solved?w.b.slice().sort((a,b)=>a[1]-b[1]):w.b.slice();let sel=-1;
   const BI={1:'z/o_buch1.webp',2:'z/o_buch2.webp',3:'z/o_buch3.webp',4:'z/o_buch4.webp'},H={1:96,2:116,3:136,4:156};
@@ -243,9 +266,9 @@ window.WIDGETS={
  // 18 Eulen
  owls(ctx){const w=ctx.D.w,row=el('div','owlrow kz-owlrow'),tw=el('div','towers kz-towers');const place={};let sel=null;const ob={},tb={};
   const OI={Horaz:'z/o_eule_horaz.webp',Fenna:'z/o_eule_fenna.webp',Bruno:'z/o_eule_bruno.webp'},TI={Nordturm:'z/o_turm_nord.webp',Ostturm:'z/o_turm_ost.webp',Westturm:'z/o_turm_west.webp'};
-  w.owls.forEach(o=>{const b=el('button','owlbtn','<img src="'+OI[o]+'" alt=""><b>'+o+'</b>');b.onclick=()=>{SFX.hoot(.35);sel=o;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.toggle('sel',x===b))};row.appendChild(b);ob[o]=b});
+  w.owls.forEach(o=>{const b=el('button','owlbtn','<img src="'+OI[o]+'" alt=""><b>'+o+'</b>');b.onclick=()=>{if(place[o]){delete place[o];sel=null;SFX.wing();row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw();return}SFX.hoot(.35);sel=o;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.toggle('sel',x===b))};row.appendChild(b);ob[o]=b});
   const draw=()=>{w.towers.forEach(t=>{const who=Object.keys(place).find(o=>place[o]===t);tb[t].querySelector('.slot').innerHTML=who?'<img src="'+OI[who]+'" alt=""><small>'+who+'</small>':'';});w.owls.forEach(o=>ob[o].classList.toggle('placed',!!place[o]))};
-  w.towers.forEach(t=>{const b=el('button','tower','<div class="slot"></div><img class="tw" src="'+TI[t]+'" alt=""><small>'+t+'</small>');b.onclick=()=>{if(!sel){toast('Tipp zuerst auf eine Eule.');return}for(const o in place)if(place[o]===t)delete place[o];place[sel]=t;SFX.wing();sel=null;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw()};tw.appendChild(b);tb[t]=b});
+  w.towers.forEach(t=>{const b=el('button','tower','<div class="slot"></div><img class="tw" src="'+TI[t]+'" alt=""><small>'+t+'</small>');b.onclick=()=>{if(!sel){const who=Object.keys(place).find(o=>place[o]===t);if(who){delete place[who];SFX.wing();draw();return}toast('Tipp zuerst auf eine Eule.');return}for(const o in place)if(place[o]===t)delete place[o];place[sel]=t;SFX.wing();sel=null;row.querySelectorAll('.owlbtn').forEach(x=>x.classList.remove('sel'));draw()};tw.appendChild(b);tb[t]=b});
   if(ctx.solved)Object.assign(place,w.sol);draw();
   const go=btn('Eulen losschicken','');go.onclick=()=>{if(Object.keys(place).length<3){toast('Jede Eule braucht einen Turm.');return}if(w.owls.every(o=>place[o]===w.sol[o])){SFX.wing();setTimeout(()=>SFX.magic(),400);ctx.check('__OK__')}else ctx.check('x')};
   ctx.noInput=true;ctx.W.append(row,tw,go)},
@@ -272,7 +295,7 @@ window.WIDGETS={
    if(hit<0||found.has(hit)){if(hit<0)SFX.tap();return}found.add(hit);const m=el('i','kz-mark');m.style.left=D[hit][0]+'%';m.style.top=D[hit][1]+'%';b.appendChild(m);SFX.twinkle(.5);cnt.textContent='Gefunden: '+found.size+' von ?';
    if(found.size===D.length){cnt.textContent='Alle '+D.length+' Unterschiede gefunden!';SFX.magic();setTimeout(()=>ctx.check('__OK__'),900)}});
   if(ctx.solved)D.forEach((d,i)=>{found.add(i);const m=el('i','kz-mark');m.style.left=d[0]+'%';m.style.top=d[1]+'%';b.appendChild(m)});
-  ctx.noInput=true;ctx.W.append(lab('Original'),a,lab('Verzaubert'),b,cnt,numtab())},
+  ctx.W.append(lab('Original'),a,lab('Verzaubert'),b,cnt,numtab())},
  // 22 Pixel
  pixel(ctx){const g=el('div','pix kz-pix');ctx.D.w.grid.forEach(r=>r.forEach(n=>{const b=el('button','',n);if(ctx.solved&&n%3===0)b.classList.add('on');b.onclick=()=>{ac();b.classList.toggle('on');SFX.tick();if(b.classList.contains('on'))SFX.twinkle(.25)};g.appendChild(b)}));ctx.W.appendChild(g)},
  // 23 Tresor

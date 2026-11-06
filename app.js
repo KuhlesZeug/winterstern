@@ -75,8 +75,9 @@ document.addEventListener('pointerdown',()=>{if(st.sound&&$('#s-desk').classList
 function musicOn(){if(!st.sound)return;const c=ac();if(!mG){try{const src=c.createMediaElementSource(music);mG=c.createGain();mG.gain.value=(voice&&!voice.paused)?MD:MV;src.connect(mG);mG.connect(master)}catch(e){music.volume=.15}}music.play().catch(()=>{})}
 function mVol(v){if(mG&&AC)mG.gain.setTargetAtTime(v,AC.currentTime,.3)}
 const voice=new Audio('stimmen.mp3?v=2');voice.preload='auto';let vStop=null,vx=null;
-function vDone(){clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on');document.querySelectorAll('.wchip.on,.grim.on').forEach(x=>x.classList.remove('on'))}
-function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
+let vTok=0,vEnd=0;
+function vDone(){vTok++;clearTimeout(vStop);try{voice.pause();if(vx)vx.pause()}catch(e){}mVol(MV);$('#btn-say').classList.remove('on');document.querySelectorAll('.wchip.on,.grim.on').forEach(x=>x.classList.remove('on'))}
+function say(k){vDone();if(!st.sound||st.voice===false||!window.VOX||!VOX[k])return false;const [s,d,fx]=VOX[k];if(fx){vx=new Audio(fx);mVol(MD);vx.play().then(()=>{vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{});return true}const go=()=>{try{voice.currentTime=s}catch(e){}vEnd=s+d;mVol(MD);voice.play().then(()=>{if(/^d\d+a$/.test(k))$('#btn-say').classList.add('on');vStop=setTimeout(vDone,d*1000+250)}).catch(()=>{})};if(voice.readyState>=1)go();else{voice.load();voice.addEventListener('loadedmetadata',go,{once:true})}return true}
 const hush=vDone;
 /* Hinweiskarten */
 function hintCard(d,n){document.querySelectorAll('.hcard').forEach(x=>x.remove());const V=window.HVIS||{},k=d+'_'+n;if(!V[k])return;
@@ -95,6 +96,12 @@ function ambLoad(n){if(!ABUF[n]){const c=ac();ABUF[n]=fetch('o/'+n+'.mp3?v=2').t
 function placeAmb(n){const c=ac(),tok=++ambTok;if(ambSrc){const s=ambSrc,g=ambG2;g.gain.setTargetAtTime(0,c.currentTime,.35);setTimeout(()=>{try{s.stop()}catch(e){}},1800);ambSrc=null;ambG2=null}
  if(windG)windG.gain.setTargetAtTime(n?0:.035*STORM,c.currentTime,.6);if(!n)return;
  ambLoad(n).then(buf=>{if(tok!==ambTok)return;const s=c.createBufferSource();s.buffer=buf;s.loop=true;s.loopStart=.03;s.loopEnd=buf.duration-.03;const g=c.createGain();g.gain.value=0;s.connect(g);g.connect(master);s.start(0,.03);g.gain.setTargetAtTime(AMBV,c.currentTime,.6);ambSrc=s;ambG2=g}).catch(()=>{})}
+function pipSay(src){if(!st.sound)return;const tok=vTok,wasV=!voice.paused,t=voice.currentTime,wx=(vx&&!vx.paused)?vx:null;
+ if(wasV){clearTimeout(vStop);try{voice.pause()}catch(e){}}if(wx){try{wx.pause()}catch(e){}}
+ const a=new Audio(src);mVol(MD);let back=false;const res=()=>{if(back)return;back=true;if(tok!==vTok){mVol(MV);return}
+  if(wasV&&st.voice!==false){setTimeout(()=>{if(tok!==vTok)return;try{voice.currentTime=Math.max(0,t-.25)}catch(e){}voice.play().then(()=>{clearTimeout(vStop);vStop=setTimeout(vDone,Math.max(.3,vEnd-t+.25)*1000+250)}).catch(()=>mVol(MV))},250)}
+  else if(wx){setTimeout(()=>{if(tok===vTok)wx.play().catch(()=>{})},250)}else mVol(MV)};
+ a.addEventListener('ended',res,{once:true});a.addEventListener('error',res,{once:true});a.play().catch(res)}
 function clip(src){vDone();if(!st.sound)return null;vx=new Audio(src);mVol(MD);vx.addEventListener('ended',()=>mVol(MV),{once:true});vx.play().catch(()=>{});return vx}
 function setSound(on){st.sound=on;save();if(!on)hush();if(master)master.gain.value=on?1:0;music.muted=!on;$('#btn-sound').innerHTML=on?IC.sound:IC.mute}
 
@@ -114,7 +121,7 @@ function pipCount(){return Object.keys(st.pip||{}).length}
 function placePip(d){const paper=$('#s-case .paper');let p=$('#pip');if(p)p.remove();if((st.pip||{})[d])return;const [pose,css]=PIPPOS[(d-1)%24];
  p=el('button','pip');p.id='pip';p.setAttribute('aria-label','Pip');p.style.cssText=css;p.innerHTML='<img src="ic/pip_'+pose+'.webp" alt="">';
  p.onclick=e=>{e.stopPropagation();ac();st.pip=st.pip||{};const neu=!st.pip[d];st.pip[d]=1;save();p.style.pointerEvents='none';p.classList.add('gone');setTimeout(()=>p.remove(),700);
-  clip(PIPV[(d+(neu?0:1))%PIPV.length]);
+  pipSay(PIPV[(d+(neu?0:1))%PIPV.length]);
   sparkleAt(p,14);if(neu)toast('Pip gefunden! '+pipCount()+' von 24')};
  paper.appendChild(p)}
 
@@ -176,8 +183,8 @@ function sealSVG(){return '<svg viewBox="-50 -50 100 100"><circle r="44" fill="u
 const SEALURL='siegel.svg';
 function renderDesk(newD){renderSky(newD);const g=$('#grid');g.innerHTML='';const td=todayNr();
  for(let d=1;d<=24;d++){const b=el('button','env');b.style.setProperty('--r',((d*37)%7-3)*.6+'deg');const u=unlocked(d);
-  if(st.done[d])b.classList.add('open');else if(!u)b.classList.add('locked');if(d===td&&!st.done[d])b.classList.add('today');
-  b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?'<b class="solvedmark">'+IC.star+'</b>':'<img src="'+SEALURL+'" alt="">'+(u?'':'<i>'+IC.lock+'</i>')));
+  const bg=!st.done[d]&&u&&st.open[d];if(st.done[d])b.classList.add('open');else if(!u)b.classList.add('locked');else if(bg)b.classList.add('begun');if(d===td&&!st.done[d])b.classList.add('today');
+  b.appendChild(el('span','num',d));b.appendChild(el('span','wax',st.done[d]?'<b class="solvedmark">'+IC.star+'</b>':'<img src="'+SEALURL+'" alt="">'+(u?'':'<i>'+IC.lock+'</i>')));if(bg)b.appendChild(el('span','begtag','offen'));
   b.onclick=()=>{if(!unlocked(d)){SFX.no();toast('Dieser Eulenbrief bleibt bis zum '+d+'. Dezember versiegelt.');return}SFX.tap();if(st.done[d]||st.open[d])openCase(d);else openEnv(d)};g.appendChild(b)}
  const n=Object.keys(st.done).length;$('#deskfoot').textContent=n===24?'Alle 24 Sterne leuchten. Öffne Brief 24 für die Sternennacht.':n+' von 24 Rätseln gelöst. Jeden Tag im Dezember bringt die Eule einen neuen Brief.'}
 

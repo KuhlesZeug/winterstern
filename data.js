@@ -82,7 +82,7 @@ window.DAYS = [
   q:'Tipp in eine Zeile und schreib die Lösungen. Welches Tier ergeben die goldenen Felder?', a:['EULE'], L:'E', how:'Erster Buchstabe von EULE',
   h:['Beginne mit der kürzesten Zeile, gefrorenes Wasser.','Das Lösungswort hat vier Buchstaben und fliegt nachts.']},
  {t:'Zwei Bilder', s:'Im Kunstsaal hängen zwei Gemälde der Burg. Ein frecher Kobold hat in der Nacht eines davon verzaubert. Zähle, wie viele Unterschiede er hineingemalt hat.',
-  w:{k:'diff', n:8},
+  w:{k:'diff', n:8}, a:['H','8','ACHT'],
   q:'Tipp im unteren Bild auf jeden Unterschied. Die Zahl der Unterschiede führt dich über die Zahlentafel zu deinem Buchstaben.', L:'H', how:'Acht Unterschiede, der achte Buchstabe ist H',
   h:['Vergleiche Himmel, Burg und Vordergrund getrennt voneinander.','Achte auf Fenster, Fahnen, Sterne und den Baum.']},
  {t:'Das Zahlenquadrat', s:'Auf einem Teppich in der Halle ist ein Quadrat aus Zahlen gewebt. Die Meisterin sagt: Färbe jede Zahl, die man ohne Rest durch drei teilen kann, golden. Dann erscheint ein Buchstabe.',

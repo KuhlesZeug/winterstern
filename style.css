@@ -664,3 +664,36 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
 .hzoom.on .hzin{transform:none}
 .hzin svg{width:100%;height:auto;box-shadow:0 18px 50px rgba(0,0,0,.6);border-radius:10px}
 .hzx{display:inline-block;margin-top:14px;color:#f6e8c4;font:700 17px 'Cormorant Garamond',Georgia,serif;border:1px solid rgba(224,185,97,.6);border-radius:999px;padding:6px 18px}
+/* 06.11.2026 Feedback: Umschläge begonnen */
+.env.begun{background:linear-gradient(160deg,#ecdcb8,#ccb589)}
+.env.begun::before{top:-4%;height:44%;left:15%;right:15%;clip-path:none;border-radius:3px 3px 0 0;background:repeating-linear-gradient(180deg,#fbf3dc 0 6px,#e6d8b6 6px 7px);box-shadow:0 2px 5px rgba(60,40,10,.35)}
+.env.begun .wax{transform:translate(-50%,-18%) rotate(-14deg) scale(.82);filter:saturate(.75) brightness(1.08)}
+.env .begtag{position:absolute;right:3px;bottom:3px;font:700 7.5px Cinzel,serif;letter-spacing:.08em;text-transform:uppercase;background:#8a2a3a;color:#fff3d6;padding:1px 4px 0;border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+/* Labyrinth */
+.kz-mgot{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px auto 0;font:600 13px Cinzel,serif;color:var(--ink)}
+.kz-mgot span{letter-spacing:.12em;text-transform:uppercase;opacity:.75;margin-right:4px}
+.kz-mgot b{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#ffe27a;border:2px solid #7a2a10;font:700 17px Cinzel,serif;color:#3a1a06;box-shadow:0 2px 4px rgba(0,0,0,.25);animation:kzpop .3s}
+.kz-mgot i{font-family:inherit;opacity:.6}
+@keyframes kzpop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.maze.bump{animation:kzbump .25s}
+@keyframes kzbump{30%{transform:translateX(-5px)}60%{transform:translateX(4px)}}
+.arrows button,.ring button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.arrows button.hit,.ring button.hit{animation:kzhit .2s}
+@keyframes kzhit{40%{transform:scale(.9);background:#f6e3a8}}
+/* Runenschloss */
+.kz-rule{text-align:center;font-style:italic;font-size:15px;margin:8px 0 2px;color:var(--ink);opacity:.85}
+.kz-drums{position:absolute;left:44.9%;top:54.3%;width:23.2%;height:15.6%;display:flex;gap:1.6%;pointer-events:none}
+.kz-drum{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:4px;background:linear-gradient(90deg,#9b7226,#e4c068 35%,#f3d98a 50%,#e4c068 65%,#9b7226);box-shadow:inset 0 3px 4px rgba(0,0,0,.45),inset 0 -3px 4px rgba(0,0,0,.45);overflow:hidden;line-height:1}
+.kz-drum b{font:700 15px Cinzel,serif;color:#3a2306;text-shadow:0 1px 0 rgba(255,240,190,.6)}
+.kz-drum i{font:700 8px Cinzel,serif;font-style:normal;color:#5a3c10;opacity:.55}
+.kz-drum.roll{animation:kzdrum .25s}
+@keyframes kzdrum{0%{transform:translateY(-12%)}100%{transform:none}}
+.kz-tries{margin-top:12px}
+.kz-tries .kz-trylab{font:600 12px Cinzel,serif;letter-spacing:.1em;text-transform:uppercase;opacity:.75;padding:4px 0;border:0}
+.kz-tries>div.new{animation:kzpop .3s}
+.kz-tries>div b{color:#8a2a3a}
+/* Schneekugel Schrift */
+.globetext{opacity:0}
+.globetext::before{content:"";position:absolute;inset:-6px -10px;border-radius:16px;background:radial-gradient(ellipse at center,rgba(8,16,48,.78),rgba(8,16,48,.55) 70%,rgba(8,16,48,0));z-index:-1}
+.globetext{font-style:normal!important;font-weight:700;font-size:17px!important;line-height:1.3;letter-spacing:.01em;color:#fffaf0;text-shadow:0 1px 3px #000,0 0 10px rgba(0,0,0,.8);z-index:3;isolation:isolate}
+.kz-chest .kz-drum b{position:static;opacity:1;transition:none;font:700 15px Cinzel,serif;color:#3a2306;text-shadow:0 1px 0 rgba(255,240,190,.6)}
