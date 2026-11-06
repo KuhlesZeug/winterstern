@@ -301,10 +301,12 @@ document.querySelectorAll('#rankpick button').forEach(b=>b.onclick=()=>{SFX.tap(
 function sealState(){const s=$('.cert-seal'),ok=!!st.sealed;s.classList.toggle('empty',!ok);$('.cert-btns').style.display=ok?'flex':'none';
  $('.cert-tap').textContent=ok?'Tipp auf die Urkunde, um sie groß anzusehen und als PDF zu speichern.':'Halte deinen Finger auf das leere Siegelfeld, um deine Urkunde zu besiegeln.';if(ok)secretState()}
 (function(){const s=$('.cert-seal');let t0=0,raf=0,on=false;const H=1300;
- const stop=()=>{on=false;cancelAnimationFrame(raf);if(!st.sealed){s.style.setProperty('--p','0')}};
- const step=n=>{if(!on)return;const p=Math.min(1,(n-t0)/H);s.style.setProperty('--p',p.toFixed(3));if(Math.random()<.25)tone(400+p*900,.05,'sine',.03);if(p>=1){on=false;stamp();return}raf=requestAnimationFrame(step)};
- const start=e=>{if(st.sealed||!$('#cert-wrap').classList.contains('on'))return;e.preventDefault();e.stopPropagation();ac();on=true;t0=performance.now();if(navigator.vibrate)navigator.vibrate(15);raf=requestAnimationFrame(step)};
- function stamp(){st.sealed=1;save();SFX.seal();SFX.magic();if(navigator.vibrate)navigator.vibrate([20,30,90]);sparkleAt(s,18);setTimeout(sealState,500)}
+ let fx=null;const fxShow=()=>{if(fx)fx.remove();fx=el('div','sealfx','<div class="sfx-ring"><div class="sfx-wax"></div></div><div class="sfx-t">Siegel wird gezaubert …</div>');document.body.appendChild(fx);const r=s.getBoundingClientRect();const up=r.top>200;fx.style.left=(r.left+r.width/2)+'px';fx.style.top=(up?r.top-24:r.bottom+24)+'px';fx.classList.add(up?'up':'down');requestAnimationFrame(()=>fx&&fx.classList.add('on'))};
+ const fxHide=ok=>{const f=fx;fx=null;if(!f)return;if(ok){f.classList.add('done');f.querySelector('.sfx-t').textContent='Besiegelt!';setTimeout(()=>f.classList.remove('on'),900);setTimeout(()=>f.remove(),1300)}else{f.classList.remove('on');setTimeout(()=>f.remove(),250)}};
+ const stop=()=>{on=false;cancelAnimationFrame(raf);if(!st.sealed){s.style.setProperty('--p','0');fxHide(false)}};
+ const step=n=>{if(!on)return;const p=Math.min(1,(n-t0)/H);s.style.setProperty('--p',p.toFixed(3));if(fx)fx.style.setProperty('--p',p.toFixed(3));if(Math.random()<.25)tone(400+p*900,.05,'sine',.03);if(p>=1){on=false;stamp();return}raf=requestAnimationFrame(step)};
+ const start=e=>{if(st.sealed||!$('#cert-wrap').classList.contains('on'))return;e.preventDefault();e.stopPropagation();ac();on=true;t0=performance.now();fxShow();if(navigator.vibrate)navigator.vibrate(15);raf=requestAnimationFrame(step)};
+ function stamp(){st.sealed=1;save();if(fx)fx.style.setProperty('--p','1');fxHide(true);SFX.seal();SFX.magic();if(navigator.vibrate)navigator.vibrate([20,30,90]);sparkleAt(s,18);setTimeout(sealState,500)}
  s.addEventListener('pointerdown',start);s.addEventListener('pointerup',stop);s.addEventListener('pointerleave',stop);s.addEventListener('pointercancel',stop);s.addEventListener('click',e=>e.stopPropagation());s.addEventListener('contextmenu',e=>e.preventDefault())})();
 function secretState(){const w=$('#secret-wrap');if(!gift||!gift.sec){w.classList.remove('on');return}
  $('#secret-from').textContent=gift.von?'Von '+gift.von:'Von jemandem, der dich lieb hat';$('#secret-open').textContent=st.secretRead?'Brief noch einmal lesen':'Brief öffnen';
