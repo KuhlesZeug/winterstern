@@ -190,16 +190,25 @@ window.WIDGETS={
   const lg=el('div','legend kz-legend');w.herbs.forEach(h=>lg.appendChild(el('span','','<img src="'+HI[h[0]]+'" alt="">'+h[0])));ctx.noInput=true;ctx.W.append(g,lg)},
  // 12 Waage
  scale(ctx){const w=ctx.D.w;let n=ctx.solved?w.n:0;const E='<img src="z/i_drachenei.webp">',K='<img src="ic/crystal.webp">',M='<img src="z/i_mondstein.webp">';const rc=el('div','recipe kz-recipe','<div>'+E+'<span>Drachenei =</span>'+K+K+'<span>+</span>'+M+'</div><div>'+K+'<span>Kristall =</span>'+M+M+'</div>');
-  const s=sv('svg',{viewBox:'0 0 320 210',class:'scale kz-scale'});s.innerHTML='<defs><linearGradient id="kzg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b8"/><stop offset=".45" stop-color="#d4a548"/><stop offset="1" stop-color="#7a5420"/></linearGradient></defs><rect x="153" y="60" width="14" height="128" rx="5" fill="url(#kzg)" stroke="#5a3d14" stroke-width="1.5"/><path d="M100 200 q60 -26 120 0z" fill="url(#kzg)" stroke="#5a3d14" stroke-width="1.5"/><circle cx="160" cy="54" r="10" fill="url(#kzg)" stroke="#5a3d14" stroke-width="1.5"/><path d="M160 30 l4 10 l10 0 l-8 6 l3 10 l-9 -6 l-9 6 l3 -10 l-8 -6 l10 0z" fill="#ffd76a" stroke="#7a5420" stroke-width="1"/>';
-  const beam=sv('g',{});beam.innerHTML='<rect x="28" y="55" width="264" height="10" rx="5" fill="url(#kzg)" stroke="#5a3d14" stroke-width="1.5"/><circle cx="34" cy="60" r="7" fill="url(#kzg)" stroke="#5a3d14"/><circle cx="286" cy="60" r="7" fill="url(#kzg)" stroke="#5a3d14"/>';s.appendChild(beam);
-  const lp=sv('g',{}),rp=sv('g',{});s.append(lp,rp);
-  const draw=()=>{const tilt=Math.max(-14,Math.min(14,(w.n-n)*3));beam.setAttribute('transform','rotate('+(-tilt)+' 160 60)');const dy=Math.sin(tilt*Math.PI/180)*110;
-   lp.setAttribute('transform','translate(50 '+(120+dy)+')');rp.setAttribute('transform','translate(270 '+(120-dy)+')');
-   const pan='<path d="M-4 -60 L-40 0 M4 -60 L40 0" stroke="#7a5420" stroke-width="1.5"/><path d="M-44 0 q44 22 88 0z" fill="url(#kzg)" stroke="#5a3d14" stroke-width="1.5"/>';lp.innerHTML=pan+'<image href="z/i_drachenei.webp" x="-24" y="-50" width="48" height="52"/>';
-   let t='';for(let i=0;i<n;i++)t+='<image href="z/i_mondstein.webp" x="'+((i%4)*19-38)+'" y="'+(-20-Math.floor(i/4)*16)+'" width="20" height="20"/>';rp.innerHTML=pan+t;
-   num.textContent=n};
+  // Gemalte Waage aus vier Ebenen: Balken kippt um die Mitte, Schalen hängen senkrecht an den Haken
+  const L={stand:[387,32,769,819],beam:[170,130,983,186],panL:[39,186,369,613],panR:[784,186,1113,613]},PV=[577,163],HK={L:[203,182],R:[949,182]};
+  const img=(k)=>{const b=L[k];return '<image href="z/w_'+k+'.webp" x="'+b[0]+'" y="'+b[1]+'" width="'+(b[2]-b[0])+'" height="'+(b[3]-b[1])+'"/>'};
+  const s=sv('svg',{viewBox:'20 20 1112 820',class:'scale kz-scale kz-scale2'});
+  s.innerHTML='<ellipse cx="578" cy="812" rx="210" ry="16" fill="rgba(90,60,20,.18)"/><ellipse class="sh" cx="203" cy="640" rx="140" ry="12" fill="rgba(90,60,20,.13)"/><ellipse class="sh" cx="949" cy="640" rx="140" ry="12" fill="rgba(90,60,20,.13)"/>';
+  const lp=sv('g',{}),rp=sv('g',{}),beam=sv('g',{}),st=sv('g',{});lp.innerHTML=img('panL');rp.innerHTML=img('panR');beam.innerHTML=img('beam');st.innerHTML=img('stand');
+  const li=sv('g',{}),ri=sv('g',{});lp.appendChild(li);rp.appendChild(ri);
+  li.innerHTML='<image href="z/i_drachenei.webp" x="140" y="392" width="126" height="138"/>';
+  s.append(lp,rp,beam,st);const sh=s.querySelectorAll('.sh');
+  const rot=(p,a)=>{const r=a*Math.PI/180,dx=p[0]-PV[0],dy=p[1]-PV[1];return [PV[0]+dx*Math.cos(r)-dy*Math.sin(r),PV[1]+dx*Math.sin(r)+dy*Math.cos(r)]};
+  let cur=null;
+  const pose=a=>{beam.setAttribute('transform','rotate('+a+' '+PV[0]+' '+PV[1]+')');const l=rot(HK.L,a),r=rot(HK.R,a);
+   lp.setAttribute('transform','translate('+(l[0]-HK.L[0]).toFixed(1)+' '+(l[1]-HK.L[1]).toFixed(1)+')');rp.setAttribute('transform','translate('+(r[0]-HK.R[0]).toFixed(1)+' '+(r[1]-HK.R[1]).toFixed(1)+')');
+   sh[0].setAttribute('cx',l[0].toFixed(1));sh[1].setAttribute('cx',r[0].toFixed(1))};
+  const swing=to=>{const from=cur==null?to:cur;cur=to;const t0=performance.now(),D=900;const f=t=>{const k=Math.min(1,(t-t0)/D);const e=1-Math.pow(1-k,3);const wob=Math.sin(k*Math.PI*3)*(1-k)*(to-from)*.18;pose(from+(to-from)*e+wob);if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)};
+  const stones=()=>{let t='';const rows=[5,4,1];let i=0;for(let r=0;r<rows.length&&i<n;r++){for(let j=0;j<rows[r]&&i<n;j++,i++){const x=949+(j-(rows[r]-1)/2)*54-32,y=462-r*38;t+='<image href="z/i_mondstein.webp" x="'+x.toFixed(1)+'" y="'+y+'" width="64" height="64"/>'}}ri.innerHTML=t};
+  const draw=()=>{const tilt=Math.max(-12,Math.min(12,(w.n-n)*2.6));stones();swing(-tilt);num.textContent=n};
   const c=el('div','ctrl');const m=el('button','btn ghost sm','− Stein'),num=el('b','',''),p=el('button','btn ghost sm','+ Stein');c.append(m,num,p);
-  let tm=null;const chg=d=>{n=Math.max(0,Math.min(10,n+d));SFX.tick();if(d>0)SFX.plop(.35);draw();clearTimeout(tm);if(n===w.n){tm=setTimeout(()=>{SFX.magic();sparkleAt(s,20);toast('Die Waage steht ganz still. '+n+' Mondsteine!');setTimeout(()=>ctx.check('__OK__'),700)},700)}};
+  let tm=null;const chg=d=>{const o=n;n=Math.max(0,Math.min(10,n+d));if(n===o)return;SFX.tick();if(d>0)SFX.plop(.35);draw();clearTimeout(tm);if(n===w.n){tm=setTimeout(()=>{SFX.magic();sparkleAt(s,20);toast('Die Waage steht ganz still. '+n+' Mondsteine!');setTimeout(()=>ctx.check('__OK__'),700)},700)}};
   m.onclick=()=>chg(-1);p.onclick=()=>chg(1);ctx.noInput=true;ctx.W.append(rc,s,c,numtab());draw()},
  // 13 Kerze
  candle(ctx){const cave=el('div','cave kz-cave');cave.append(el('div','insc',ctx.D.w.text),el('div','dark'),el('div','flame','<img src="ic/candle.webp" alt="">'));let lit=false;

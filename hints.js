@@ -32,9 +32,9 @@ mo+=T(160,66,'Beim abnehmenden Mond leuchtet die linke Seite.','text-anchor="mid
 const MOON=card('SILBERHAARS MONDBUCH',mo,'');
 
 /* Waage */
-const egg=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="13" ry="17" fill="#c9a6e0" stroke="${INK}" stroke-width="1.2"/><path d="M${x-9} ${y-2} q4 -5 8 0 q4 5 8 0" fill="none" stroke="#7d5aa6" stroke-width="1.2"/>`;
-const cry=(x,y)=>`<path d="M${x} ${y-14} L${x+10} ${y-3} L${x} ${y+14} L${x-10} ${y-3}Z" fill="#9fd3ec" stroke="${INK}" stroke-width="1.2"/><path d="M${x-10} ${y-3} H${x+10} M${x} ${y-14} V${y+14}" stroke="#5a9ec2" stroke-width=".8"/>`;
-const ms=(x,y)=>`<circle cx="${x}" cy="${y}" r="9" fill="#e8e6f2" stroke="${INK}" stroke-width="1.2"/><path d="M${x-3} ${y-3} a4 4 0 1 0 4 6" fill="none" stroke="#9a96b8" stroke-width="1.2"/>`;
+const egg=(x,y)=>`<image href="z/i_drachenei.webp" x="${x-16}" y="${y-20}" width="32" height="40"/>`;
+const cry=(x,y)=>`<image href="ic/crystal.webp" x="${x-15}" y="${y-17}" width="30" height="34"/>`;
+const ms=(x,y)=>`<image href="z/i_mondstein.webp" x="${x-13}" y="${y-13}" width="26" height="26"/>`;
 let wg=egg(40,86)+T(66,92,'=','font-size="22" font-weight="700"')+cry(96,86)+T(116,92,'+','font-size="20"')+cry(136,86)+T(156,92,'+','font-size="20"')+ms(178,86);
 wg+=T(204,80,'Ein Drachenei','font-size="13" font-weight="700"')+T(204,96,'wiegt zwei Kristalle','font-size="12"')+T(204,110,'und einen Mondstein','font-size="12"');
 wg+=cry(40,150)+T(66,156,'=','font-size="22" font-weight="700"')+ms(96,150)+T(116,156,'+','font-size="20"')+ms(136,150);

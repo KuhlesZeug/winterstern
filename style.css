@@ -742,3 +742,4 @@ h1 em{display:block;font-style:normal;color:var(--gold);font-size:46px;font-fami
  #s-case #c-solved{grid-row:10}
  #s-case #c-widget{grid-column:2;grid-row:3/12;align-self:start;margin:4px 0 0;min-width:0}
 }
+.kz-scale2{filter:drop-shadow(0 4px 6px rgba(60,40,10,.16));width:min(90vw,360px)}
